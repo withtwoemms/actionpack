@@ -55,7 +55,7 @@ release:
 
 .PHONY: tests # runs all tests
 tests: $(VENV_PYTHON) $(TESTDIR)
-	$(error Not yet implemented)
+	$(info Not yet implemented)
 
 .PHONY: tree # prints the directory structure
 tree:

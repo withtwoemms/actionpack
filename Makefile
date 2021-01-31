@@ -54,8 +54,8 @@ release:
 	$(error Not yet implemented)
 
 .PHONY: tests # runs all tests
-tests: $(VENV_PYTHON) $(TESTDIR)
-	$(info Not yet implemented)
+tests: $(VENV_PYTHON)
+	@$(VENV_PYTHON) -m unittest discover -s $(TESTDIR)/$(PROJECT_NAME)
 
 .PHONY: tree # prints the directory structure
 tree:

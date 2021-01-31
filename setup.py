@@ -15,6 +15,6 @@ setup(
     url='https://github.com/withtwoemms/action-pack',
     include_package_data=True,
     install_requires=[
-        'OSlash==0.6.3',
+        'OSlash==0.5.1',
     ]
 )

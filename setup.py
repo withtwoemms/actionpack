@@ -16,5 +16,6 @@ setup(
     include_package_data=True,
     install_requires=[
         'OSlash==0.5.1',
+        'validators==0.18.2'
     ]
 )

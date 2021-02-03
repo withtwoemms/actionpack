@@ -55,7 +55,7 @@ release:
 
 .PHONY: tests # runs all tests
 tests: $(VENV_PYTHON)
-	@$(VENV_PYTHON) -m unittest discover -s $(TESTDIR)/$(PROJECT_NAME)
+	@$(VENV_PYTHON) -m unittest $(TESTDIR).$(PROJECT_NAME)$(if $(TESTCASE),.$(TESTCASE),)
 
 .PHONY: tree # prints the directory structure
 tree:

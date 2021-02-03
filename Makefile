@@ -53,9 +53,13 @@ reinstall: uninstall install
 release:
 	$(error Not yet implemented)
 
+.PHONY: tests # runs specific test module or TestCase
+test: $(VENV_PYTHON)
+	@$(VENV_PYTHON) -m unittest $(TESTDIR).$(PROJECT_NAME)$(if $(TESTCASE),.$(TESTCASE),)
+
 .PHONY: tests # runs all tests
 tests: $(VENV_PYTHON)
-	@$(VENV_PYTHON) -m unittest discover -s $(TESTDIR)/$(PROJECT_NAME)
+	@$(VENV_PYTHON) -m unittest discover $(TESTDIR).$(PROJECT_NAME)
 
 .PHONY: tree # prints the directory structure
 tree:

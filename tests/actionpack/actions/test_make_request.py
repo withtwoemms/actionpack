@@ -1,4 +1,5 @@
 from actionpack.actions import MakeRequest
+from tests.actionpack.actions import FakeResponse
 
 from requests import Response
 from requests.exceptions import MissingSchema
@@ -11,14 +12,9 @@ from validators import ValidationFailure
 
 class MakeRequestTest(TestCase):
 
-    class FakeResponse(Response):
-        def __init__(self, content: bytes=bytes(), status: int=200):
-            self._content = content
-            self.status_code = status
-
     @patch('requests.Session.send')
     def test_can_MakeRequest(self, mock_session_send):
-        mock_session_send.return_value = self.FakeResponse()
+        mock_session_send.return_value = FakeResponse()
         action = MakeRequest('GET', 'http://localhost')
         result = action.perform()
 
@@ -26,7 +22,7 @@ class MakeRequestTest(TestCase):
 
     @patch('requests.Session.send')
     def test_can_MakeRequest_even_if_failure(self, mock_session_send):
-        mock_session_send.return_value = self.FakeResponse(status=500)
+        mock_session_send.return_value = FakeResponse(status=500)
 
         first_action = MakeRequest('SUP', 'http://localhost')
         first_result = first_action.perform()

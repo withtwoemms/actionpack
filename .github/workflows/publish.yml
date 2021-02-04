@@ -5,7 +5,7 @@ on: [push]
 jobs:
   publish:
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.merged == 'true' || contains(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v2
         with:
@@ -23,7 +23,6 @@ jobs:
         run: VERSION=$(make git-tag-pre-release) make build
 
       - name: Publish distribution 📦 to Test PyPI
-        if: github.event.pull_request.merged == 'true' || contains(github.ref, 'refs/tags/')
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__

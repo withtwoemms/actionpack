@@ -15,7 +15,6 @@ setup(
     maintainer='Emmanuel I. Obi',
     maintainer_email='withtwoemms@gmail.com',
     url='https://github.com/withtwoemms/actionpack',
-    packages=find_packages(exclude=['tests']),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

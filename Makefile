@@ -55,6 +55,9 @@ release:
 
 .PHONY: tests # runs specific test module or TestCase
 test: $(VENV_PYTHON)
+ifeq ($(TESTCASE),)
+	$(error TESTCASE not specified)
+endif
 	@$(VENV_PYTHON) -m unittest $(TESTDIR).$(PROJECT_NAME)$(if $(TESTCASE),.$(TESTCASE),)
 
 .PHONY: tests # runs all tests

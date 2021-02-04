@@ -9,7 +9,7 @@ all: venv install
 
 .PHONY: build # builds a distributable artifact
 build: $(VENV) $(VENV_PYTHON)
-	@$(VENV_PYTHON) setup.py bdist_wheel
+	@$(VENV_PYTHON) setup.py sdist
 
 .PHONY: clean # deletes build residues, virtual environment, and python metafiles
 clean: clean-build clean-venv clean-pyc

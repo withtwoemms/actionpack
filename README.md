@@ -2,7 +2,8 @@
 
 > a lib for describing Actions and how they should be performed
 
-![tests](https://github.com/withtwoemms/actionpack/workflows/tests/badge.svg)
+[![tests](https://github.com/withtwoemms/actionpack/workflows/tests/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Atests)
+[![publish](https://github.com/withtwoemms/actionpack/workflows/publish/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Apublish)
 
 # Overview
 

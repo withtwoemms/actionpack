@@ -9,7 +9,7 @@ all: venv install
 
 .PHONY: build # builds a distributable artifact
 build: $(VENV) $(VENV_PYTHON)
-	@$(VENV_PYTHON) setup.py bdist_wheel
+	@$(VENV_PYTHON) setup.py sdist
 
 .PHONY: clean # deletes build residues, virtual environment, and python metafiles
 clean: clean-build clean-venv clean-pyc
@@ -42,6 +42,10 @@ commands:
 git-tag:
 	@echo $(shell git describe --tags)
 
+.PHONY: git-tag-pre-release
+git-tag-pre-release:
+	@echo "$(shell make git-tag | cut -d '-' -f1)rc$(shell make git-tag | cut -d '-' -f2)"
+
 .PHONY: install # installs project and dep to virtual environment
 install: build $(VENV) $(VENV_PYTHON) clean-build
 	@$(VENV_PYTHON) -m pip install -e .
@@ -55,6 +59,9 @@ release:
 
 .PHONY: tests # runs specific test module or TestCase
 test: $(VENV_PYTHON)
+ifeq ($(TESTCASE),)
+	$(error TESTCASE not specified)
+endif
 	@$(VENV_PYTHON) -m unittest $(TESTDIR).$(PROJECT_NAME)$(if $(TESTCASE),.$(TESTCASE),)
 
 .PHONY: tests # runs all tests

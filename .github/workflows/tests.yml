@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   check:
+    if: startsWith(github.ref, 'refs/tags') == 'false'
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4

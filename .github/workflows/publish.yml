@@ -43,7 +43,7 @@ jobs:
       - name: Make virtual environment
         run: make
 
-      - name: Build distribution 📦
+      - name: Build unofficial distribution 📦
         run: LOCAL_VERSION_SCHEME=true make build
 
       - name: Publish distribution 📦 to Test PyPI
@@ -52,6 +52,10 @@ jobs:
           user: __token__
           password: ${{ secrets.test_pypi_password }}
           repository_url: https://test.pypi.org/legacy/
+
+      - name: Build official distribution 📦
+        if: contains(github.ref, 'refs/tags/')
+        run: make clean-build && make build
 
       - name: Publish distribution 📦 to PyPI
         if: contains(github.ref, 'refs/tags/')

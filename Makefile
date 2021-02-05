@@ -83,3 +83,7 @@ venv:
 		$(SYSTEM_PYTHON) -m pip install virtualenv --user; \
 		$(SYSTEM_PYTHON) -m virtualenv $(VENV) >/dev/null; \
 	fi
+
+version:
+	@$(VENV_PYTHON) setup.py --version
+

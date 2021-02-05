@@ -17,6 +17,9 @@ class Action:
     def validate(self):
         return self
 
+    def _name(self, _name):
+        self.name = _name
+
     def __repr__(self):
         return f'{self.__class__.__name__}'
 

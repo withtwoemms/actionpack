@@ -39,3 +39,26 @@ class Procedure:
         except StopIteration:
             self._actions = iter(self.actions)
 
+
+class KeyedProcedure(Procedure):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for action in self.actions:
+            if not action.__dict__.get('name'):
+                msg = f'All {self.__class__.__name__} Actions must have a name: {str(action)}'
+                raise KeyedProcedure.UnnamedAction(msg)
+
+    def execute(self, max_workers: int=5):
+        if self.sync:
+            for action in self.actions:
+                yield action.name, action.perform()
+        else:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {executor.submit(action.perform): action for action in self}
+                for future in as_completed(futures):
+                    yield futures[future].name, future.result()
+
+    class UnnamedAction(Exception):
+        pass
+

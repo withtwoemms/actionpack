@@ -5,7 +5,8 @@ class FakeAction(Action):
 
     result = f'Performing Action.'
 
-    def __init__(self, exception=None):
+    def __init__(self, name=None, exception=None):
+        self._name(name)
         self.exception = exception
         self.instruction = lambda: self.result
 

@@ -33,6 +33,10 @@ class ProcedureTest(TestCase):
         self.assertIsInstance(next(results), Right)
         self.assertIsInstance(next(results), Left)
 
+    def test_can_validate_Procedure(self):
+        with self.assertRaises(Procedure.NotAnAction):
+            Procedure('wut.', self.failure).validate()
+
     # TODO (withtwoemms) -- add concurrency tests
 
     def test_can_create_KeyedProcedure(self):

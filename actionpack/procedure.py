@@ -13,6 +13,15 @@ class Procedure:
         self._actions = iter(self.actions)
         self.sync = sync
 
+    def validate(self):
+        try:
+            for action in self.actions:
+                if not isinstance(action, Action):
+                    msg = f'Procedures can only execute Actions: {str(action)}'
+                    raise Procedure.NotAnAction(msg)
+        except Exception as e:
+            raise e
+
     def execute(self, max_workers: int=5):
         if self.sync:
             for action in self.actions:
@@ -39,6 +48,8 @@ class Procedure:
         except StopIteration:
             self._actions = iter(self.actions)
 
+    class NotAnAction(Exception): pass
+
 
 class KeyedProcedure(Procedure):
 
@@ -59,6 +70,5 @@ class KeyedProcedure(Procedure):
                 for future in as_completed(futures):
                     yield futures[future].name, future.result()
 
-    class UnnamedAction(Exception):
-        pass
+    class UnnamedAction(Exception): pass
 

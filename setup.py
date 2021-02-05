@@ -1,5 +1,10 @@
+from os import environ as envvars
 from pathlib import Path
 from setuptools import setup, find_packages
+
+
+def local_scheme(version):
+    return ''
 
 
 setup(
@@ -10,7 +15,8 @@ setup(
     setup_requires=[
         'setuptools_scm==5.0.1'
     ],
-    use_scm_version=True,
+    # hack suggested @ https://github.com/pypa/setuptools_scm/issues/342
+    use_scm_version={"local_scheme": local_scheme} if envvars.get('LOCAL_VERSION_SCHEME') else True,
     packages=find_packages(exclude=['tests']),
     maintainer='Emmanuel I. Obi',
     maintainer_email='withtwoemms@gmail.com',

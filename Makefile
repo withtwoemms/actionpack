@@ -38,14 +38,6 @@ commands:
 	@tput sgr0
 	@echo
 
-.PHONY: git-tag
-git-tag:
-	@echo $(shell git describe --tags)
-
-.PHONY: git-tag-pre-release
-git-tag-pre-release:
-	@echo "$(shell make git-tag | cut -d '-' -f1)rc$(shell make git-tag | cut -d '-' -f2)"
-
 .PHONY: install # installs project and dep to virtual environment
 install: build $(VENV) $(VENV_PYTHON) clean-build
 	@$(VENV_PYTHON) -m pip install -e .

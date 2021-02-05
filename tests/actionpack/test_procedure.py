@@ -45,7 +45,7 @@ class ProcedureTest(TestCase):
 
         self.assertIsInstance(results_dict[self.success.name], Right)
 
-    def test_KeyedProcedure_only_works_with_named_Actions(self):
+    def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
-            KeyedProcedure(FakeAction(), self.failure).execute()
+            KeyedProcedure(FakeAction(), self.failure)
 

@@ -55,6 +55,9 @@ class KeyedProcedure(Procedure):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.validate()
+
+    def validate(self):
         for action in self.actions:
             if not action.__dict__.get('name'):
                 msg = f'All {self.__class__.__name__} Actions must have a name: {str(action)}'

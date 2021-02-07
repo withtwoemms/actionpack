@@ -1,3 +1,5 @@
+import pickle
+
 from actionpack.actions import ReadBytes
 from actionpack.utils import pickleable
 
@@ -35,5 +37,9 @@ class ReadBytesTest(TestCase):
         self.assertIsInstance(directory_result.value, IsADirectoryError)
 
     def test_can_pickle(self):
+        pickled = pickleable(self.action)
+        unpickled = pickle.loads(pickled)
+
         self.assertTrue(pickleable(self.action))
+        self.assertEqual(unpickled.__dict__, self.action.__dict__)
 

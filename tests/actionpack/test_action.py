@@ -1,6 +1,7 @@
 import pickle
 
 from actionpack import Action
+from actionpack.utils import pickleable
 from tests.actionpack import FakeAction
 
 from oslash import Left
@@ -26,6 +27,7 @@ class ActionTest(TestCase):
         pickled = pickle.dumps(action)
         unpickled = pickle.loads(pickled)
 
+        self.assertEqual(pickleable(action), pickled)
         self.assertEqual(unpickled.result, action.result)
         self.assertEqual(unpickled.state, action.state)
 

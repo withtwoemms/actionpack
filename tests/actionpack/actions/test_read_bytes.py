@@ -8,7 +8,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 
-class ReadInputTest(TestCase):
+class ReadBytesTest(TestCase):
 
     contents = 'some file contents.'.encode()
 

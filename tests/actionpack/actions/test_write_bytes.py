@@ -1,4 +1,5 @@
 from actionpack.actions import WriteBytes
+from actionpack.utils import pickleable
 
 from io import BytesIO
 from io import TextIOWrapper
@@ -30,29 +31,30 @@ class WriteBytesTest(TestCase):
         def __exit__(self, *args):
             self.closed = True
 
+    def setUp(self):
+        self.salutation = 'Hello.'.encode()
+        self.question = ' How are you?'.encode()
+        self.action = WriteBytes('valid/path/to/file', self.question)
+
     @patch('pathlib.Path.open')
     def test_can_WriteBytes(self, mock_output):
-        salutation = 'Hello.'.encode()
-        question = ' How are you?'.encode()
-
-        file = self.FakeFile(salutation)
+        file = self.FakeFile(self.salutation)
         mock_output.return_value = file
-        action = WriteBytes('valid/path/to/file', question)
-        result = action.perform()
+        result = self.action.perform()
 
-        self.assertEqual(file.read(), salutation + question)
-        self.assertEqual(result.value, len(question))
+        self.assertEqual(file.read(), self.salutation + self.question)
+        self.assertEqual(result.value, len(self.question))
 
     @patch('pathlib.Path.open')
     def test_can_overWriteBytes(self, mock_output):
-        salutation = 'Hello.'.encode()
-        question = ' How are you?'.encode()
-
-        file = self.FakeFile(salutation, 'wb')
+        file = self.FakeFile(self.salutation, 'wb')
         mock_output.return_value = file
-        action = WriteBytes('valid/path/to/file', question, overwrite=True)
-        result = action.perform()
+        action = WriteBytes('valid/path/to/file', self.question, overwrite=True)
+        result = self.action.perform()
 
-        self.assertEqual(file.read(), question)
-        self.assertEqual(result.value, len(question))
+        self.assertEqual(file.read(), self.question)
+        self.assertEqual(result.value, len(self.question))
+
+    def test_can_pickle(self):
+        self.assertTrue(pickleable(self.action))
 

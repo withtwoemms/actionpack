@@ -13,11 +13,17 @@ class MakeRequest(Action):
     def __init__(self, method: str, url: str, data: dict=None, headers: dict=None, session: Session=None):
         self.method = method.upper()
         self.url = url
-        self.request = Request(method, self.url, data=data, headers=headers).prepare()
+        self.method = method
+        self.data = data
+        self.headers = headers
         self.session = session
 
+    def prepare(self, method: str, url: str, data: dict=None, headers=None) -> Request:
+        return Request(method, self.url, data=data, headers=headers).prepare()
+
     def instruction(self):
-        return (self.session if self.session else Session()).send(self.request)
+        request = self.prepare(self.method, self.url, self.data, self.headers)
+        return (self.session if self.session else Session()).send(request)
 
     def validate(self):
         if self.method not in self.methods:

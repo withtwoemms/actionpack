@@ -1,3 +1,5 @@
+import pickle
+
 from actionpack.actions import WriteBytes
 from actionpack.utils import pickleable
 
@@ -56,5 +58,9 @@ class WriteBytesTest(TestCase):
         self.assertEqual(result.value, len(self.question))
 
     def test_can_pickle(self):
+        pickled = pickleable(self.action)
+        unpickled = pickle.loads(pickled)
+
         self.assertTrue(pickleable(self.action))
+        self.assertEqual(unpickled.__dict__, self.action.__dict__)
 

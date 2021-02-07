@@ -1,3 +1,5 @@
+import pickle
+
 from actionpack.actions import ReadInput
 from actionpack.utils import pickleable
 
@@ -17,5 +19,9 @@ class ReadInputTest(TestCase):
         self.assertEqual(self.action.perform().value, reply)
 
     def test_can_pickle(self):
+        pickled = pickleable(self.action)
+        unpickled = pickle.loads(pickled)
+
         self.assertTrue(pickleable(self.action))
+        self.assertEqual(unpickled.__dict__, self.action.__dict__)
 

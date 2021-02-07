@@ -23,3 +23,12 @@ class Action:
     def __repr__(self):
         return f'{self.__class__.__name__}'
 
+    #def __reduce__(self):
+    #    return self.__class__, tuple(vars(s).values())
+
+    def __getstate__(self):
+        return vars(self)
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+

@@ -20,6 +20,20 @@ class Action:
     def _name(self, _name):
         self.name = _name
 
+    def __getstate__(self):
+        return vars(self)
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            raise self.__class__.NotComparable(f'{str(self)} ≠ {str(other)}')
+
+        return self.__getstate__() == other.__getstate__()
+
     def __repr__(self):
         return f'{self.__class__.__name__}'
+
+    class NotComparable(Exception): pass
 

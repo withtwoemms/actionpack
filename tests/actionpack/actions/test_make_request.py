@@ -1,4 +1,7 @@
+import pickle
+
 from actionpack.actions import MakeRequest
+from actionpack.utils import pickleable
 from tests.actionpack.actions import FakeResponse
 
 from requests import Response
@@ -12,13 +15,13 @@ from validators import ValidationFailure
 
 class MakeRequestTest(TestCase):
 
+    def setUp(self):
+        self.action = MakeRequest('GET', 'http://localhost')
+
     @patch('requests.Session.send')
     def test_can_MakeRequest(self, mock_session_send):
         mock_session_send.return_value = FakeResponse()
-        action = MakeRequest('GET', 'http://localhost')
-        result = action.perform()
-
-        self.assertIsInstance(result, Right)
+        self.assertIsInstance(self.action.perform(), Right)
 
     @patch('requests.Session.send')
     def test_can_MakeRequest_even_if_failure(self, mock_session_send):
@@ -34,7 +37,10 @@ class MakeRequestTest(TestCase):
         self.assertIsInstance(second_result, Left)
         self.assertIsInstance(second_result.value, ValidationFailure)
 
-    def test_failed_MakeRequest_construction_raises(self):
-        with self.assertRaises(MissingSchema):
-            MakeRequest('GET', 'localhost')
+    def test_can_pickle(self):
+        pickled = pickleable(self.action)
+        unpickled = pickle.loads(pickled)
+
+        self.assertTrue(pickleable(self.action))
+        self.assertEqual(unpickled.__dict__, self.action.__dict__)
 

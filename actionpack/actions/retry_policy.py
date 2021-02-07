@@ -13,7 +13,9 @@ class RetryPolicy(Action):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
-        self.instruction = lambda: self.enact(delay_between_attempts)
+
+    def instruction(self):
+        return self.enact(self.delay_between_attempts)
 
     def validate(self):
         try:

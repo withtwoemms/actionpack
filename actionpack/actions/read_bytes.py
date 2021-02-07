@@ -5,7 +5,9 @@ from pathlib import Path
 class ReadBytes(Action):
     def __init__(self, filename: str):
         self.path = Path(filename)
-        self.instruction = lambda: self.path.read_bytes()
+
+    def instruction(self) -> bytes:
+        return self.path.read_bytes()
 
     def validate(self):
         if not self.path.exists():

@@ -1,4 +1,7 @@
+import pickle
+
 from actionpack import Action
+from actionpack.utils import pickleable
 from tests.actionpack import FakeAction
 
 from oslash import Left
@@ -18,4 +21,13 @@ class ActionTest(TestCase):
         result = FakeAction(exception=exception).perform()
         self.assertIsInstance(result, Left)
         self.assertEqual(result.value, exception)
+
+    def test_Action_can_be_serialized(self):
+        action = FakeAction()
+        pickled = pickle.dumps(action)
+        unpickled = pickle.loads(pickled)
+
+        self.assertEqual(pickleable(action), pickled)
+        self.assertEqual(unpickled.result, action.result)
+        self.assertEqual(unpickled.state, action.state)
 

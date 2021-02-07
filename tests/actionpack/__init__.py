@@ -8,7 +8,10 @@ class FakeAction(Action):
     def __init__(self, name=None, exception=None):
         self._name(name)
         self.exception = exception
-        self.instruction = lambda: self.result
+        self.state = {'this': 'state'}
+
+    def instruction(self):
+        return self.result
 
     def validate(self):
         if self.exception:

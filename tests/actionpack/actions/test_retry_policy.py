@@ -1,3 +1,5 @@
+import pickle
+
 from actionpack.actions import MakeRequest
 from actionpack.actions import RetryPolicy
 from actionpack.utils import pickleable
@@ -41,3 +43,8 @@ class RetryPolicyTest(TestCase):
         mock_session_send.side_effect = NotImplemented
         self.assertTrue(pickleable(self.action))
 
+        pickled = pickleable(self.action)
+        unpickled = pickle.loads(pickled)
+
+        self.assertTrue(pickleable(self.action))
+        self.assertEqual(unpickled.__dict__, self.action.__dict__)

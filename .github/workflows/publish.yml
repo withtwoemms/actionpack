@@ -44,7 +44,7 @@ jobs:
         run: make
 
       - name: Build unofficial distribution 📦
-        run: LOCAL_VERSION_SCHEME=true make build
+        run: PYTHONWARNINGS="ignore" LOCAL_VERSION_SCHEME=true make build
 
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@master

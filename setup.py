@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 
 def local_scheme(version):
-    return ''
+    return 'rc'
 
 
 setup(

@@ -3,10 +3,6 @@ from pathlib import Path
 from setuptools import setup, find_packages
 
 
-def local_scheme(version):
-    return 'rc'
-
-
 setup(
     name='actionpack',
     description='a lib for describing Actions and how they should be performed',
@@ -15,8 +11,7 @@ setup(
     setup_requires=[
         'setuptools_scm==5.0.1'
     ],
-    # hack suggested @ https://github.com/pypa/setuptools_scm/issues/342
-    use_scm_version={"local_scheme": local_scheme} if envvars.get('LOCAL_VERSION_SCHEME') else True,
+    use_scm_version={'local_scheme': 'no-local-version'} if envvars.get('LOCAL_VERSION_SCHEME') else True,
     packages=find_packages(exclude=['tests']),
     maintainer='Emmanuel I. Obi',
     maintainer_email='withtwoemms@gmail.com',

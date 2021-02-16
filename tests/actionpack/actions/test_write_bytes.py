@@ -24,6 +24,7 @@ class WriteBytesTest(TestCase):
         def write(self, data: bytes):
             if self.mode == 'wb':
                 self.buffer.seek(0)
+                self.buffer.truncate()
             self.buffer.write(data)
             return len(data)
 

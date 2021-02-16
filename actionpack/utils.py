@@ -1,5 +1,6 @@
 import pickle
 
+from functools import wraps
 from itertools import chain
 from typing import Optional
 
@@ -15,4 +16,14 @@ def pickleable(obj) -> Optional[bytes]:
         return pickle.dumps(obj)
     except Exception:
         pass
+
+
+def synchronized(lock):
+    def wrap(f):
+        @wraps(f)
+        def newFunction(*args, **kw):
+            with lock:
+                return f(*args, **kw)
+        return newFunction
+    return wrap
 

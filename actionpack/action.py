@@ -1,11 +1,18 @@
+from actionpack.utils import synchronized
+
 from oslash import Left
 from oslash import Right
+from threading import RLock
 from typing import List
 from typing import Union
 
 
 class Action:
-    def perform(self) -> Union[Left, Right]:
+
+    lock = RLock()
+
+    @synchronized(lock)
+    def perform(self, lock: RLock=None) -> Union[Left, Right]:
         if callable(self.instruction):
             try:
                 return Right(self.validate().instruction())

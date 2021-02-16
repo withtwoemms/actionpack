@@ -27,6 +27,11 @@ class ActionTest(TestCase):
         self.assertIsInstance(result, Left)
         self.assertEqual(result.value, exception)
 
+    def test_Action_can_raise_exception(self):
+        exception = Exception('This is fine :|')
+        with self.assertRaises(type(exception)):
+            FakeAction(exception=exception).perform(should_raise=True)
+
     def test_Action_can_be_serialized(self):
         action = FakeAction()
         pickled = pickle.dumps(action)

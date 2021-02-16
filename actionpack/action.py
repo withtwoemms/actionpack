@@ -12,7 +12,7 @@ class Action:
     lock = RLock()
 
     @synchronized(lock)
-    def perform(self, lock: RLock=None) -> Union[Left, Right]:
+    def perform(self) -> Union[Left, Right]:
         if callable(self.instruction):
             try:
                 return Right(self.validate().instruction())

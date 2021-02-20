@@ -77,6 +77,17 @@ venv:
 		$(SYSTEM_PYTHON) -m virtualenv $(VENV) >/dev/null; \
 	fi
 
+SEMVER_REGEX = ^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$
+
+check-version:
+#	@[[ $(shell make version) =~ $(SEMVER_REGEX) ]] && echo "yes"
+	@echo $(shell make version)
+	@make version | grep '0.5'
+	@make version | sed -e 's/$(SEMVER_REGEX)/hello/'
+	$(make version)
+	echo $(shell [[ $(shell echo $(shell make version)) =~ $(SEMVER_REGEX) ]] && echo matched)
+	
+
 version:
 	@$(VENV_PYTHON) setup.py --version
 

@@ -48,7 +48,7 @@ jobs:
 
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
-        if: {{ $(make is-official-version) != true }}
+        if: ${{ $(make is-official-version) != true }}
         with:
           user: __token__
           password: ${{ secrets.test_pypi_password }}

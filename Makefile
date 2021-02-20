@@ -40,6 +40,7 @@ commands:
 
 .PHONY: install # installs project and dep to virtual environment
 install: build $(VENV) $(VENV_PYTHON) clean-build
+	@$(VENV_PYTHON) -m pip install -r requirements.txt
 	@$(VENV_PYTHON) -m pip install -e .
 
 .PHONY: reinstall # uninstall then install

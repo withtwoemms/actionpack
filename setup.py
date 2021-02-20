@@ -27,7 +27,6 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     install_requires=[
-        'marshmallow==3.10.0',
         'OSlash==0.5.1',
         'requests==2.25.1',
         'validators==0.18.2',

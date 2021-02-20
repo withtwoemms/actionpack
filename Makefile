@@ -1,3 +1,4 @@
+SEMVER_REGEX = ^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$
 SYSTEM_PYTHON = $(shell which python3)
 PROJECT_NAME = $(shell basename $(CURDIR))
 VENV = $(PROJECT_NAME)-venv
@@ -43,6 +44,10 @@ install: build $(VENV) $(VENV_PYTHON) clean-build
 	@$(VENV_PYTHON) -m pip install -r requirements.txt
 	@$(VENV_PYTHON) -m pip install -e .
 
+.PHONY: is-official-version # check if current version is official SEMVER
+is-official-version:
+	@(make version | grep -Eq "$(SEMVER_REGEX)") && echo "true"
+
 .PHONY: reinstall # uninstall then install
 reinstall: uninstall install
 
@@ -77,17 +82,7 @@ venv:
 		$(SYSTEM_PYTHON) -m virtualenv $(VENV) >/dev/null; \
 	fi
 
-SEMVER_REGEX = ^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$
-
-check-version:
-#	@[[ $(shell make version) =~ $(SEMVER_REGEX) ]] && echo "yes"
-	@echo $(shell make version)
-	@make version | grep '0.5'
-	@make version | sed -e 's/$(SEMVER_REGEX)/hello/'
-	$(make version)
-	echo $(shell [[ $(shell echo $(shell make version)) =~ $(SEMVER_REGEX) ]] && echo matched)
-	
-
+.PHONY: version # produce current version
 version:
 	@$(VENV_PYTHON) setup.py --version
 

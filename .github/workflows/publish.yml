@@ -46,7 +46,9 @@ jobs:
       - name: Build unofficial distribution 📦
         run: PYTHONWARNINGS="ignore" LOCAL_VERSION_SCHEME=true make build
 
-      - run: echo '::set-env name=IS_OFFICIAL_VERSION::$( make is-official-version )'
+      - name: Check if an official version is to be released
+        run: |
+            echo 'IS_OFFICIAL_VERSION=$( make is-official-version )' >> $GITHUB_ENV
 
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@master

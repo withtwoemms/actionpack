@@ -59,7 +59,7 @@ class KeyedProcedure(Procedure):
 
     def validate(self):
         for action in self.actions:
-            if not action.__dict__.get('name'):
+            if not action.name:
                 msg = f'All {self.__class__.__name__} Actions must have a name: {str(action)}'
                 raise KeyedProcedure.UnnamedAction(msg)
 

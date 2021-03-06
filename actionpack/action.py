@@ -2,12 +2,15 @@ from actionpack.utils import synchronized
 
 from oslash import Left
 from oslash import Right
+from string import Template
 from threading import RLock
 from typing import List
 from typing import Union
 
 
 class Action:
+
+    _name = None
 
     lock = RLock()
 
@@ -26,8 +29,17 @@ class Action:
     def validate(self):
         return self
 
-    def _name(self, _name):
-        self.name = _name
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @name.deleter
+    def name(self):
+        del self._name
 
     def __getstate__(self):
         return vars(self)
@@ -42,7 +54,8 @@ class Action:
         return self.__getstate__() == other.__getstate__()
 
     def __repr__(self):
-        return f'{self.__class__.__name__}'
+        tmpl = Template(f'<{self.__class__.__name__}$name>')
+        return tmpl.substitute(name=f'|name="{self.name}"') if self.name else tmpl.substitute(name='')
 
     class NotComparable(Exception): pass
 

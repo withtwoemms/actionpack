@@ -45,7 +45,7 @@ class ActionTest(TestCase):
         file = FakeFile(b'Hello.', 'wb')
 
         def perform_and_collect(action: Action, results: list):
-            thing = action.perform()
+            action.perform()
             results.append(file.read())
 
         initial_file_contents = file.read()

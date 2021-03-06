@@ -7,7 +7,7 @@ class FakeAction(Action):
     result = f'Performing Action.'
 
     def __init__(self, name=None, exception=None):
-        self._name(name)
+        self.name = name
         self.exception = exception
         self.state = {'this': 'state'}
 

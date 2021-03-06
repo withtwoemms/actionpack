@@ -13,6 +13,7 @@ setup(
     ],
     use_scm_version={'local_scheme': 'no-local-version'} if envvars.get('LOCAL_VERSION_SCHEME') else True,
     packages=find_packages(exclude=['tests']),
+    author='Emmanuel I. Obi',
     maintainer='Emmanuel I. Obi',
     maintainer_email='withtwoemms@gmail.com',
     url='https://github.com/withtwoemms/actionpack',
@@ -23,8 +24,10 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     install_requires=[
         'OSlash==0.5.1',

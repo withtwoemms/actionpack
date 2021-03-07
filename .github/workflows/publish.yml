@@ -1,9 +1,9 @@
 name: publish
 
-on:
-  push:
-    branches: [main]
-    tags: ['*']
+on: [push]
+  #push:
+    #branches: [main]
+    #tags: ['*']
 
 jobs:
   check:
@@ -48,23 +48,23 @@ jobs:
 
       - name: Check if an official version is to be released
         run: |
-            echo 'IS_OFFICIAL_VERSION=$( make is-official-version )' >> $GITHUB_ENV
+            echo 'IS_OFFICIAL_VERSION=$( make is-official-version )' >> $GITHUB_ENV && env | sort
 
-      - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        if: env.IS_OFFICIAL_VERSION != 'true'
-        with:
-          user: __token__
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
+      #- name: Publish distribution 📦 to Test PyPI
+      #  uses: pypa/gh-action-pypi-publish@master
+      #  if: env.IS_OFFICIAL_VERSION != 'true'
+      #  with:
+      #    user: __token__
+      #    password: ${{ secrets.test_pypi_password }}
+      #    repository_url: https://test.pypi.org/legacy/
 
-      - name: Build official distribution 📦
-        if: contains(github.ref, 'refs/tags/')
-        run: make clean-build && make build
+      #- name: Build official distribution 📦
+      #  if: contains(github.ref, 'refs/tags/')
+      #  run: make clean-build && make build
 
-      - name: Publish distribution 📦 to PyPI
-        if: contains(github.ref, 'refs/tags/')
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
+      #- name: Publish distribution 📦 to PyPI
+      #  if: contains(github.ref, 'refs/tags/')
+      #  uses: pypa/gh-action-pypi-publish@master
+      #  with:
+      #    user: __token__
+      #    password: ${{ secrets.pypi_password }}

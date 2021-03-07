@@ -48,7 +48,7 @@ jobs:
 
       - name: Check if an official version is to be released
         run: |
-            export IS_OFFICIAL_VERSION=$( make is-official-version ) && env | sort
+            echo 'IS_OFFICIAL_VERSION=$( make is-official-version )' >> $GITHUB_ENV && env | sort
 
       #- name: Publish distribution 📦 to Test PyPI
       #  uses: pypa/gh-action-pypi-publish@master

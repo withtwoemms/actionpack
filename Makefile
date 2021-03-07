@@ -1,4 +1,4 @@
-SEMVER_REGEX = ^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$
+SEMVER_REGEX = ^([0-9]+)\.([0-9]+)\.([0-9]+)$$
 SYSTEM_PYTHON = $(shell which python3)
 PROJECT_NAME = $(shell basename $(CURDIR))
 VENV = $(PROJECT_NAME)-venv
@@ -46,7 +46,7 @@ install: build $(VENV) $(VENV_PYTHON) clean-build
 
 .PHONY: is-official-version # check if current version is official SEMVER
 is-official-version:
-	@(make version | grep -Eq "$(SEMVER_REGEX)") && echo "true"
+	@if [[ $(shell make version) =~ $(SEMVER_REGEX) ]]; then echo "true"; else echo "false"; fi
 
 .PHONY: reinstall # uninstall then install
 reinstall: uninstall install

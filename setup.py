@@ -12,6 +12,7 @@ setup(
         'setuptools_scm==5.0.1'
     ],
     use_scm_version={'local_scheme': 'no-local-version'} if envvars.get('LOCAL_VERSION_SCHEME') else True,
+    #use_scm_version=True,
     packages=find_packages(exclude=['tests']),
     author='Emmanuel I. Obi',
     maintainer='Emmanuel I. Obi',

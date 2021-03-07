@@ -4,11 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from functools import reduce
 from multiprocessing.pool import ThreadPool
-from typing import List
 
 
 class Procedure:
-    def __init__(self, *actions: List[Action], sync: bool=True):
+    def __init__(self, *actions: Action, sync: bool=True):
         self.actions = actions
         self._actions = iter(self.actions)
         self.sync = sync

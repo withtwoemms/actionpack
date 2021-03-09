@@ -46,7 +46,7 @@ install: build $(VENV) $(VENV_PYTHON) clean-build
 
 .PHONY: is-official-version # check if current version is official SEMVER
 is-official-version:
-	@if [[ $(shell make version) =~ $(SEMVER_REGEX) ]]; then echo "true"; else echo "false"; fi
+	@echo $(shell if [[ $(shell make version) =~ $(SEMVER_REGEX) ]]; then echo "true"; else echo "false"; fi)
 
 .PHONY: reinstall # uninstall then install
 reinstall: uninstall install

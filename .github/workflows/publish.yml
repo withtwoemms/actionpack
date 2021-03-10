@@ -47,7 +47,10 @@ jobs:
         run: PYTHONWARNINGS="ignore" LOCAL_VERSION_SCHEME=true make build
 
       - name: Check if an official version is to be released
-        run: echo "IS_OFFICIAL_VERSION=${make is-official-version}" >> $GITHUB_ENV
+        run: |
+          echo 'IS_OFFICIAL_VERSION<<EOF' >> $GITHUB_ENV
+          make is-official-version >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: <testing-print-env>
         run: env | sort

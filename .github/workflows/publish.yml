@@ -48,7 +48,7 @@ jobs:
 
       - name: Is official version
         id: vars
-        run: echo ::set-output name=is_official_version::$(make is-official-version)
+        run: echo ::set-output name=is_official_version::$(echo $(make is-official-version))
 
       - name: <testing-view-variable>
         run: echo "${{ steps.vars.outputs.is_official_version }}"

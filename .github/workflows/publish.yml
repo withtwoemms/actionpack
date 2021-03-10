@@ -51,10 +51,7 @@ jobs:
         run: echo ::set-output name=is_official_version::$(make is-official-version)
 
       - name: Check if an official version is to be released
-        run: |
-          echo 'IS_OFFICIAL_VERSION<<EOF' >> $GITHUB_ENV
-          make is-official-version >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+        run: echo "IS_OFFICIAL_VERSION=${{ steps.vars.outputs.is_official_version }}" >> $GITHUB_ENV
 
       - name: <testing-print-env>
         run: env | sort

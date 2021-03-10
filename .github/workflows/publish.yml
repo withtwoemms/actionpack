@@ -46,6 +46,10 @@ jobs:
       - name: Build unofficial distribution 📦
         run: PYTHONWARNINGS="ignore" LOCAL_VERSION_SCHEME=true make build
 
+      - name: Is official version
+        id: vars
+        run: echo ::set-output name=is_official_version::$(make is-official-version)
+
       - name: Check if an official version is to be released
         run: |
           echo 'IS_OFFICIAL_VERSION<<EOF' >> $GITHUB_ENV

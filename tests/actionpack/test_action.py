@@ -67,7 +67,7 @@ class ActionTest(TestCase):
         action = FakeAction()
         self.assertIsNone(action.name)
         name1 = 'new'
-        action.set_name(name1)
+        action.set(name=name1)
         self.assertEqual(action.name, name1)
         name2 = 'different name'
         action.name = name2

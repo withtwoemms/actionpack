@@ -9,16 +9,18 @@ from oslash import Right
 from unittest import TestCase
 
 
+success = FakeAction(name='success')
+failure = FakeAction(name='failure',
+                     exception=Exception('something went wrong :/'))
+
+
 class ProcedureTest(TestCase):
 
     def assertIsIterable(self, x):
         return isinstance(x, Iterable)
 
     def setUp(self):
-        self.success = FakeAction(name='success')
-        self.failure = FakeAction(name='failure',
-                                  exception=Exception('something went wrong :/'))
-        self.procedure = Procedure(self.success, self.failure)
+        self.procedure = Procedure(success, failure)
 
     def test_Procedure_is_Iterable_of_Actions(self):
         self.assertIsIterable(self.procedure)
@@ -43,17 +45,34 @@ class ProcedureTest(TestCase):
 
     def test_can_validate_Procedure(self):
         with self.assertRaises(Procedure.NotAnAction):
-            Procedure('wut.', self.failure).validate()
+            Procedure('wut.', failure).validate()
 
     # TODO (withtwoemms) -- add concurrency tests
 
+
+class KeyedProcedureTest(TestCase):
+
     def test_can_create_KeyedProcedure(self):
-        results = KeyedProcedure(self.success, self.failure).execute()
+        results = KeyedProcedure(success, failure).execute()
         results_dict = dict(results)
 
-        self.assertIsInstance(results_dict[self.success.name], Right)
+        self.assertIsInstance(results_dict[success.name], Right)
+
+    def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
+        action1, action2, action3 = FakeAction(), FakeAction(exception=Exception()), FakeAction()
+        key1, key2, key3 = 1, False, 1.01
+        results = KeyedProcedure(
+            action1.set(name=key1),
+            action2.set(name=key2),
+            action3.set(name=key3)
+        ).execute()
+        results_dict = dict(results)
+
+        self.assertIsInstance(results_dict[key1], Right)
+        self.assertIsInstance(results_dict[key2], Left)
+        self.assertIsInstance(results_dict[key3], Right)
 
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
-            KeyedProcedure(FakeAction(), self.failure)
+            KeyedProcedure(FakeAction(), failure)
 

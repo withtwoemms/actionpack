@@ -31,7 +31,7 @@ setup(
     ],
     install_requires=[
         'OSlash==0.5.1',
-        'requests==2.25.1',
+        'requests',
         'validators==0.18.2',
     ]
 )

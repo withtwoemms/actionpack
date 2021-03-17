@@ -32,7 +32,7 @@ jobs:
     needs: check
     outputs:
         is-official-version:
-            value: ${{ steps.vars.outputs.is_official_version }}
+          value: ${{ steps.vars.outputs.is_official_version }}
     steps:
       - uses: actions/checkout@v2
         with:

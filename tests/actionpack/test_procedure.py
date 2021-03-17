@@ -14,16 +14,17 @@ failure = FakeAction(name='failure',
                      exception=Exception('something went wrong :/'))
 
 
-class ProcedureTest(TestCase):
+def assertIsIterable(possible_collection):
+    return isinstance(possible_collection, Iterable)
 
-    def assertIsIterable(self, x):
-        return isinstance(x, Iterable)
+
+class ProcedureTest(TestCase):
 
     def setUp(self):
         self.procedure = Procedure(success, failure)
 
     def test_Procedure_is_Iterable_of_Actions(self):
-        self.assertIsIterable(self.procedure)
+        assertIsIterable(self.procedure)
         self.assertIsInstance(next(self.procedure), FakeAction)
         self.assertIsInstance(next(self.procedure), FakeAction)
         self.assertIs(next(self.procedure), None)
@@ -31,14 +32,14 @@ class ProcedureTest(TestCase):
     def test_Procedure_execution_yields_results(self):
         results = self.procedure.execute()
 
-        self.assertIsIterable(results)
+        assertIsIterable(results)
         self.assertIsInstance(next(results), Right)
         self.assertIsInstance(next(results), Left)
 
     def test_Procedure_execution_can_raise(self):
         results = self.procedure.execute(should_raise=True)
 
-        self.assertIsIterable(results)
+        assertIsIterable(results)
         self.assertIsInstance(next(results), Right)
         with self.assertRaises(Exception):
             next(results)
@@ -57,6 +58,14 @@ class KeyedProcedureTest(TestCase):
         results_dict = dict(results)
 
         self.assertIsInstance(results_dict[success.name], Right)
+
+    def test_KeyedProcedure_execution_can_raise(self):
+        results = KeyedProcedure(success, failure).execute(should_raise=True)
+
+        assertIsIterable(results)
+        self.assertIsInstance(next(results), tuple)
+        with self.assertRaises(Exception):
+            next(results)
 
     def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
         action1, action2, action3 = FakeAction(), FakeAction(exception=Exception()), FakeAction()

@@ -58,6 +58,20 @@ class KeyedProcedureTest(TestCase):
 
         self.assertIsInstance(results_dict[success.name], Right)
 
+    def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
+        action1, action2, action3 = FakeAction(), FakeAction(exception=Exception()), FakeAction()
+        key1, key2, key3 = 1, False, 1.01
+        results = KeyedProcedure(
+            action1.set(name=key1),
+            action2.set(name=key2),
+            action3.set(name=key3)
+        ).execute()
+        results_dict = dict(results)
+
+        self.assertIsInstance(results_dict[key1], Right)
+        self.assertIsInstance(results_dict[key2], Left)
+        self.assertIsInstance(results_dict[key3], Right)
+
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
             KeyedProcedure(FakeAction(), failure)

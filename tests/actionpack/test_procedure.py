@@ -33,6 +33,14 @@ class ProcedureTest(TestCase):
         self.assertIsInstance(next(results), Right)
         self.assertIsInstance(next(results), Left)
 
+    def test_Procedure_execution_can_raise(self):
+        results = self.procedure.execute(should_raise=True)
+
+        self.assertIsIterable(results)
+        self.assertIsInstance(next(results), Right)
+        with self.assertRaises(Exception):
+            next(results)
+
     def test_can_validate_Procedure(self):
         with self.assertRaises(Procedure.NotAnAction):
             Procedure('wut.', self.failure).validate()

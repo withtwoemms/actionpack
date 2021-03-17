@@ -63,3 +63,13 @@ class ActionTest(TestCase):
             initial_file_contents + action1.bytes_to_write + action2.bytes_to_write
         )
 
+    def test_Action_can_be_renamed(self):
+        action = FakeAction()
+        self.assertIsNone(action.name)
+        name1 = 'new'
+        action.set_name(name1)
+        self.assertEqual(action.name, name1)
+        name2 = 'different name'
+        action.name = name2
+        self.assertEqual(action.name, name2)
+

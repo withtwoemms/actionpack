@@ -29,6 +29,9 @@ class Action:
     def validate(self):
         return self
 
+    def set_name(self, name: str):
+        self._name = name
+
     @property
     def name(self):
         return self._name

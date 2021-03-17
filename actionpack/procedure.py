@@ -21,10 +21,10 @@ class Procedure:
         except Exception as e:
             raise e
 
-    def execute(self, max_workers: int=5):
+    def execute(self, max_workers: int=5, should_raise: bool=False):
         if self.sync:
             for action in self.actions:
-                yield action.perform()
+                yield action.perform(should_raise=should_raise) if should_raise else action.perform()
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = {executor.submit(action.perform): str(action) for action in self}

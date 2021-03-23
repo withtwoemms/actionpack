@@ -64,7 +64,7 @@ endif
 
 .PHONY: tests # runs all tests
 tests: $(VENV_PYTHON)
-	@coverage run --source $(TESTDIR).$(PROJECT_NAME) -m unittest discover && coverage report -m
+	@$(VENV_PYTHON) -m coverage run --source $(TESTDIR).$(PROJECT_NAME) -m unittest discover && coverage report -m
 
 .PHONY: tree # prints the directory structure
 tree:

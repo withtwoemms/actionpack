@@ -21,6 +21,8 @@ jobs:
       - name: Make virtual environment
         run: make
 
-      - name: Run tests & Upload coverage
-        run: make tests && bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+      - name: Run tests
+        run: make tests
 
+      - name: Upload coverage
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}

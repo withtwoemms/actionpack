@@ -20,4 +20,4 @@ comment:
   require_changes: no
 
 fixes:
-    - "/home/runner/work/actionpack/actionpack/tests/actionpack/::"
+    - "/home/runner/work/actionpack/actionpack/tests/actionpack/::/actionpack/actionpack/tests/actionpack/"

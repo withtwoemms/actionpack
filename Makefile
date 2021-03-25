@@ -62,9 +62,14 @@ ifeq ($(TESTCASE),)
 endif
 	@$(VENV_PYTHON) -m unittest $(TESTDIR).$(PROJECT_NAME)$(if $(TESTCASE),.$(TESTCASE),)
 
+.PHONY: test-coverage # generates coverage report
+test-coverage: $(VENV_PYTHON) .coverage
+	@$(VENV_PYTHON) -m coverage xml
+
 .PHONY: tests # runs all tests
 tests: $(VENV_PYTHON)
-	@$(VENV_PYTHON) -m unittest discover $(TESTDIR).$(PROJECT_NAME)
+	@$(VENV_PYTHON) -m coverage run --source $(TESTDIR).$(PROJECT_NAME) --branch -m unittest discover
+	@$(VENV_PYTHON) -m coverage report -m
 
 .PHONY: tree # prints the directory structure
 tree:

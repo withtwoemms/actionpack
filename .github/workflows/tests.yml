@@ -22,4 +22,13 @@ jobs:
         run: make
 
       - name: Run tests
-        run: make tests
+        run: make tests && make test-coverage
+
+      - name: Upload coverage
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Archive coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: ${{ github.workspace }}/coverage.xml

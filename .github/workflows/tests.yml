@@ -22,7 +22,7 @@ jobs:
         run: make
 
       - name: Run tests
-        run: make tests && coverage xml
+        run: make tests && make test-coverage
 
       - name: Upload coverage
         run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}

@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     install_requires=[
-        'OSlash==0.5.1',
+        'OSlash==0.6.3',
         'requests',
         'validators==0.18.2',
     ]

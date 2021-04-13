@@ -2,6 +2,8 @@ from actionpack import Action
 from actionpack import KeyedProcedure
 from actionpack import Procedure
 from tests.actionpack import FakeAction
+from tests.actionpack import FakeFile
+from tests.actionpack.actions import FakeWriteBytes
 
 from collections.abc import Iterable
 from oslash import Left
@@ -48,7 +50,24 @@ class ProcedureTest(TestCase):
         with self.assertRaises(Procedure.NotAnAction):
             Procedure('wut.', failure).validate()
 
-    # TODO (withtwoemms) -- add concurrency tests
+    def test_can_execute_Procedure_asynchronously(self):
+        file = FakeFile(mode='w')
+
+        question = b' How are you?'
+        wellwish = b' I hope you\'re well.'
+
+        action1 = FakeWriteBytes(file, question, delay=0.2)
+        action2 = FakeWriteBytes(file, wellwish, delay=0.1)
+
+        procedure = Procedure(action1, action2)
+        results = procedure.execute(should_raise=True, synchronously=False)
+
+        assertIsIterable(results)
+        self.assertIsInstance(next(results), Right)
+        self.assertIsInstance(next(results), Right)
+
+        # NOTE: the wellwish precedes since the question took longer
+        self.assertEqual(file.read(), wellwish + question)
 
 
 class KeyedProcedureTest(TestCase):

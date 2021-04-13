@@ -14,17 +14,20 @@ class Action:
 
     lock = RLock()
 
-    @synchronized(lock)
-    def perform(self, should_raise: bool=False) -> Union[Left, Right]:
-        if callable(self.instruction):
-            try:
-                return Right(self.validate().instruction())
-            except Exception as e:
-                if should_raise:
-                    raise e
-                return Left(e)
-        else:
+    def _perform(self, should_raise: bool=False) -> Union[Left, Right]:
+        if not callable(self.instruction):
             return Left(TypeError(f'Must be callable: {self.instruction}'))
+
+        try:
+            return Right(self.validate().instruction())
+        except Exception as e:
+            if should_raise:
+                raise e
+            return Left(e)
+
+    @synchronized(lock)
+    def perform(self, should_raise: bool=False):
+        return self._perform(should_raise)
 
     def validate(self):
         return self

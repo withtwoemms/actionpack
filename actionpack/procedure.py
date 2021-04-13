@@ -7,10 +7,9 @@ from multiprocessing.pool import ThreadPool
 
 
 class Procedure:
-    def __init__(self, *actions: Action, sync: bool=True):
+    def __init__(self, *actions: Action):
         self.actions = actions
         self._actions = iter(self.actions)
-        self.sync = sync
 
     def validate(self):
         try:
@@ -21,19 +20,19 @@ class Procedure:
         except Exception as e:
             raise e
 
-    def execute(self, max_workers: int=5, should_raise: bool=False):
-        if self.sync:
+    def execute(self, max_workers: int=5, should_raise: bool=False, synchronously: bool=True):
+        if synchronously:
             for action in self.actions:
                 yield action.perform(should_raise=should_raise) if should_raise else action.perform()
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = {executor.submit(action.perform): str(action) for action in self}
+                futures = {executor.submit(action._perform, should_raise=should_raise): str(action) for action in self}
                 for future in as_completed(futures):
                     yield future.result()
 
     def __repr__(self):
         for action in self.actions:
-            header = f'\nProcedure for {"synchronously" if self.sync else "asynchronously"} performing\nthe following Actions:\n'
+            header = f'\nProcedure for performing the following Actions:\n'
             bullet = '  * '
             actions = reduce(lambda a, b: str(a) + f'\n{bullet}' + str(b), self.actions)
             return header + bullet + actions
@@ -62,16 +61,15 @@ class KeyedProcedure(Procedure):
                 msg = f'All {self.__class__.__name__} Actions must have a name: {str(action)}'
                 raise KeyedProcedure.UnnamedAction(msg)
 
-    def execute(self, max_workers: int=5, should_raise: bool=False):
-        if self.sync:
+    def execute(self, max_workers: int=5, should_raise: bool=False, synchronously: bool=True):
+        if synchronously:
             for action in self.actions:
                 yield (action.name, action.perform(should_raise=should_raise)) \
                       if should_raise else (action.name, action.perform())
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = {executor.submit(action.perform): action for action in self}
+                futures = {executor.submit(action._perform, should_raise=should_raise): action for action in self}
                 for future in as_completed(futures):
-                    yield futures[future].name, future.result()
+                    yield (futures[future].name, future.result())
 
     class UnnamedAction(Exception): pass
-

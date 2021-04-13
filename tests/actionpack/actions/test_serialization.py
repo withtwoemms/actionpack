@@ -39,29 +39,29 @@ class SerializationTest(TestCase):
         result = serialization.perform()
 
         self.assertIsInstance(result, Right)
-        self.assertIsInstance(result.value, str)
-        self.assertTrue(json.loads(result.value))
+        self.assertIsInstance(result._value, str)
+        self.assertTrue(json.loads(result._value))
 
     def test_can_deserialize_marshmallow(self):
         deserialization = Serialization(self.UserSchema(), json.dumps(self.user_dict), inverse=True)
         result = deserialization.perform()
 
         self.assertIsInstance(result, Right)
-        self.assertIsInstance(self.User(**result.value), self.User)
+        self.assertIsInstance(self.User(**result._value), self.User)
 
     def test_can_serialize_pickle(self):
         spickle = Serialization(pickle, self.user)
         serialized = spickle.perform()
 
         self.assertIsInstance(serialized, Right)
-        self.assertIsInstance(serialized.value, bytes)
+        self.assertIsInstance(serialized._value, bytes)
 
     def test_can_deserialize_pickle(self):
         respickle = Serialization(pickle, pickleable(self.user), inverse=True)
         deserialized = respickle.perform()
 
         self.assertIsInstance(deserialized, Right)
-        self.assertIsInstance(deserialized.value, self.User)
+        self.assertIsInstance(deserialized._value, self.User)
 
     def test_can_pickle(self):
         action = Serialization(self.UserSchema(), self.user)

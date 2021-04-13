@@ -23,7 +23,7 @@ class WriteBytesTest(TestCase):
         result = self.action.perform()
 
         self.assertEqual(file.read(), self.salutation + self.question)
-        self.assertEqual(result.value, len(self.question))
+        self.assertEqual(result._value, len(self.question))
 
     @patch('pathlib.Path.open')
     def test_can_overWriteBytes(self, mock_output):
@@ -33,7 +33,7 @@ class WriteBytesTest(TestCase):
         result = self.action.perform()
 
         self.assertEqual(file.read(), self.question)
-        self.assertEqual(result.value, len(self.question))
+        self.assertEqual(result._value, len(self.question))
 
     def test_can_pickle(self):
         pickled = pickleable(self.action)

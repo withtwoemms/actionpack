@@ -16,7 +16,7 @@ class ReadInputTest(TestCase):
     def test_can_ReadInput(self, mock_input):
         reply = 'I\'m fine.'
         mock_input.return_value = reply
-        self.assertEqual(self.action.perform().value, reply)
+        self.assertEqual(self.action.perform()._value, reply)
 
     def test_can_pickle(self):
         pickled = pickleable(self.action)

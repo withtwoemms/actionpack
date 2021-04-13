@@ -30,12 +30,12 @@ class MakeRequestTest(TestCase):
         first_action = MakeRequest('SUP', 'http://localhost')
         first_result = first_action.perform()
         self.assertIsInstance(first_result, Left)
-        self.assertIsInstance(first_result.value, ValueError)
+        self.assertIsInstance(first_result._error, ValueError)
 
         second_action = MakeRequest('GET', 'http://some/invalid/url')
         second_result = second_action.perform()
         self.assertIsInstance(second_result, Left)
-        self.assertIsInstance(second_result.value, ValidationFailure)
+        self.assertIsInstance(second_result._error, ValidationFailure)
 
     def test_can_pickle(self):
         pickled = pickleable(self.action)

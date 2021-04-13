@@ -22,7 +22,7 @@ class ReadBytesTest(TestCase):
         mock_input.return_value = self.contents
         result = self.action.perform()
         self.assertIsInstance(result, Right)
-        self.assertEqual(result.value, self.contents)
+        self.assertEqual(result._value, self.contents)
 
     @patch('pathlib.Path.read_bytes')
     def test_can_ReadBytes_even_if_failure(self, mock_input):
@@ -30,11 +30,11 @@ class ReadBytesTest(TestCase):
 
         invalid_file_result = ReadBytes('some/invalid/filepath').perform()
         self.assertIsInstance(invalid_file_result, Left)
-        self.assertIsInstance(invalid_file_result.value, FileNotFoundError)
+        self.assertIsInstance(invalid_file_result._error, FileNotFoundError)
 
         directory_result = ReadBytes(Path(__file__).parent).perform()
         self.assertIsInstance(directory_result, Left)
-        self.assertIsInstance(directory_result.value, IsADirectoryError)
+        self.assertIsInstance(directory_result._error, IsADirectoryError)
 
     def test_can_pickle(self):
         pickled = pickleable(self.action)

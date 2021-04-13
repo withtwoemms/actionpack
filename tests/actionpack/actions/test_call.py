@@ -23,7 +23,7 @@ class CallTest(TestCase):
     def test_can_Call(self):
         result = self.action.perform()
         self.assertIsInstance(result, Right)
-        self.assertEqual(result.value, ((self.arg,), {self.kwarg: self.kwarg}))
+        self.assertEqual(result._value, ((self.arg,), {self.kwarg: self.kwarg}))
 
     def test_can_pickle(self):
         pickled = pickleable(self.action)

@@ -25,7 +25,7 @@ class RetryPolicyTest(TestCase):
 
         self.assertEqual(self.action.retries, self.max_retries)
         self.assertIsInstance(result, Left)
-        self.assertIsInstance(result.value, RetryPolicy.Expired)
+        self.assertIsInstance(result._error, RetryPolicy.Expired)
 
     @patch('requests.Session.send')
     def test_can_enact_RetryPolicy_that_ultimately_succeeds(self, mock_session_send):

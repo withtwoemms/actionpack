@@ -61,15 +61,15 @@ class KeyedProcedure(Procedure):
                 msg = f'All {self.__class__.__name__} Actions must have a name: {str(action)}'
                 raise KeyedProcedure.UnnamedAction(msg)
 
-    def execute(self, max_workers: int=5, should_raise: bool=False, asynchronously: bool=False):
-        if asynchronously:
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = {executor.submit(action.perform, should_raise=should_raise): action for action in self}
-                for future in as_completed(futures):
-                    yield (futures[future].name, future.result())
-        else:
+    def execute(self, max_workers: int=5, should_raise: bool=False, synchronously: bool=True):
+        if synchronously:
             for action in self.actions:
                 yield (action.name, action.perform(should_raise=should_raise)) \
                       if should_raise else (action.name, action.perform())
+        else:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {executor.submit(action._perform, should_raise=should_raise): action for action in self}
+                for future in as_completed(futures):
+                    yield (futures[future].name, future.result())
 
     class UnnamedAction(Exception): pass

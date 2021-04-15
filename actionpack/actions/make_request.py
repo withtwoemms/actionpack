@@ -1,16 +1,15 @@
 from actionpack import Action
 
-from requests import Request
-from requests import Session
+from subprocess import run
+from sys import executable as python
 from validators import url as is_url
 
 
-
-class MakeRequest(Action):
+class MakeRequest(Action, requires=('requests',)):
 
     methods = ('CONNECT', 'GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE')
 
-    def __init__(self, method: str, url: str, data: dict=None, headers: dict=None, session: Session=None):
+    def __init__(self, method: str, url: str, data: dict=None, headers: dict=None, session: 'Session'=None):
         self.method = method.upper()
         self.url = url
         self.method = method
@@ -18,12 +17,12 @@ class MakeRequest(Action):
         self.headers = headers
         self.session = session
 
-    def prepare(self, method: str, url: str, data: dict=None, headers=None) -> Request:
-        return Request(method, self.url, data=data, headers=headers).prepare()
+    def prepare(self, method: str, url: str, data: dict=None, headers=None) -> 'Request':
+        return self.requests.Request(method, self.url, data=data, headers=headers).prepare()
 
     def instruction(self):
         request = self.prepare(self.method, self.url, self.data, self.headers)
-        return (self.session if self.session else Session()).send(request)
+        return (self.session if self.session else self.requests.Session()).send(request)
 
     def validate(self):
         if self.method not in self.methods:

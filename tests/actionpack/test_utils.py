@@ -38,6 +38,12 @@ class UtilsTest(TestCase):
         with self.assertRaises(Closure.LambdaNotAllowed):
             Closure(lambda: 'no good.', 'this', should='fail')
 
+    def test_Closure_repr(self):
+        closure = Closure(function, arg, kwarg=kwarg)
+        self.assertIn(function.__name__, repr(closure))
+        self.assertIn(str(arg), repr(closure))
+        self.assertIn(str(kwarg), repr(closure))
+
     def test_tally(self):
         self.assertEqual(list(tally(0)), [])
         self.assertEqual(list(tally()), [1])

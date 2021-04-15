@@ -4,10 +4,11 @@ from actionpack.actions import MakeRequest
 from actionpack.utils import pickleable
 from tests.actionpack.actions import FakeResponse
 
-from requests import Response
-from requests.exceptions import MissingSchema
 from oslash import Left
 from oslash import Right
+from requests import Response
+from requests.exceptions import MissingSchema
+from types import ModuleType
 from unittest import TestCase
 from unittest.mock import patch
 from validators import ValidationFailure
@@ -36,6 +37,9 @@ class MakeRequestTest(TestCase):
         second_result = second_action.perform()
         self.assertIsInstance(second_result, Left)
         self.assertIsInstance(second_result.value, ValidationFailure)
+
+    def test_MakeRequest_has_portable_dependency(self):
+        self.assertIsInstance(self.action.requests, ModuleType)
 
     def test_can_pickle(self):
         pickled = pickleable(self.action)

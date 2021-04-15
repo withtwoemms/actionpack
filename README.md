@@ -93,7 +93,7 @@ class MakeRequest(Action, requires=('requests',)):
 This will check if the dependencies are installed and, if so, will register each of them as class attributes.
 
 ```python
-mr = MakeRequest(Action, requires=('requests',))
+mr = MakeRequest('GET', 'http://localhost')
 mr.requests  #=> <module 'requests' from '~/actionpack/actionpack-venv/lib/python3/site-packages/requests/__init__.py'>
 ```
 

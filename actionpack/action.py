@@ -3,6 +3,8 @@ from actionpack.utils import synchronized
 from oslash import Left
 from oslash import Right
 from string import Template
+from subprocess import run
+from sys import executable as python
 from threading import RLock
 from typing import List
 from typing import Union
@@ -24,6 +26,13 @@ class Action:
             if should_raise:
                 raise e
             return Left(e)
+
+    def __init_subclass__(cls, requires=None):
+        cls.requires = requires
+        if cls.requires:
+            for requirement in requires:
+                Action.DependencyCheck(requirement)
+                setattr(cls, requirement, __import__(requirement))
 
     @synchronized(lock)
     def perform(self, should_raise: bool=False):
@@ -65,4 +74,16 @@ class Action:
         return tmpl.substitute(name=f'|name="{self.name}"') if self.name else tmpl.substitute(name='')
 
     class NotComparable(Exception): pass
+
+    class DependencyCheck:
+        def __init__(self, requires: str=None):
+            if not requires:
+                raise self.WhichPackage('do you want to check? Please specify a requires=')
+
+            result = run([python, '-m', 'pip', 'show', requires], capture_output=True)
+            if result.returncode != 0:
+                raise self.PackageMissing(f'so please install "{requires}" to proceed.')
+
+        class PackageMissing(Exception): pass
+        class WhichPackage(Exception): pass
 

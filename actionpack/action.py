@@ -3,6 +3,7 @@ from actionpack.utils import synchronized
 from oslash import Left
 from oslash import Right
 from string import Template
+from subprocess import PIPE
 from subprocess import run
 from sys import executable as python
 from threading import RLock
@@ -80,7 +81,7 @@ class Action:
             if not requires:
                 raise self.WhichPackage('do you want to check? Please specify a requires=')
 
-            result = run([python, '-m', 'pip', 'show', requires], capture_output=True)
+            result = run([python, '-m', 'pip', 'show', requires], stdout=PIPE, stderr=PIPE)
             if result.returncode != 0:
                 raise self.PackageMissing(f'so please install "{requires}" to proceed.')
 

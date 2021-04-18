@@ -73,3 +73,4 @@ class KeyedProcedure(Procedure):
                     yield (futures[future].name, future.result())
 
     class UnnamedAction(Exception): pass
+

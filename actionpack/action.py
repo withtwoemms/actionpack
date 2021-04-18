@@ -11,7 +11,11 @@ from typing import List
 from typing import Union
 
 
-class Action:
+class ActionType(type):
+    pass
+
+
+class Action(metaclass=ActionType):
 
     _name = None
 

@@ -1,8 +1,9 @@
+from actionpack.actions import Pipeline
 from actionpack.actions import ReadInput
 from actionpack.actions import ReadBytes
-from actionpack.pipeline import Pipeline
 from tests.actionpack import FakeFile
 
+from oslash import Right
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -21,6 +22,7 @@ class PipelineTest(TestCase):
         read_input = ReadInput('Which file?')
         actions = [ReadBytes, ReadInput]
         pipeline = Pipeline(read_input, *(action for action in actions))
-        result = pipeline.execute()
-        self.assertEqual(result, reply)
+        result = pipeline.perform()
+        self.assertIsInstance(result, Right)
+        self.assertEqual(result.value, reply)
 

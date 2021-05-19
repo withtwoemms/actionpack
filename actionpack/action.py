@@ -7,7 +7,6 @@ from subprocess import PIPE
 from subprocess import run
 from sys import executable as python
 from threading import RLock
-from typing import List
 from typing import Union
 
 
@@ -17,7 +16,7 @@ class Action:
 
     lock = RLock()
 
-    def _perform(self, should_raise: bool=False) -> Union[Left, Right]:
+    def _perform(self, should_raise: bool = False) -> Union[Left, Right]:
         if not callable(self.instruction):
             return Left(TypeError(f'Must be callable: {self.instruction}'))
 
@@ -36,7 +35,7 @@ class Action:
                 setattr(cls, requirement, __import__(requirement))
 
     @synchronized(lock)
-    def perform(self, should_raise: bool=False):
+    def perform(self, should_raise: bool = False):
         return self._perform(should_raise)
 
     def validate(self):
@@ -74,10 +73,11 @@ class Action:
         tmpl = Template(f'<{self.__class__.__name__}$name>')
         return tmpl.substitute(name=f'|name="{self.name}"') if self.name else tmpl.substitute(name='')
 
-    class NotComparable(Exception): pass
+    class NotComparable(Exception):
+        pass
 
     class DependencyCheck:
-        def __init__(self, requires: str=None):
+        def __init__(self, requires: str = None):
             if not requires:
                 raise self.WhichPackage('do you want to check? Please specify a requires=')
 
@@ -85,6 +85,8 @@ class Action:
             if result.returncode != 0:
                 raise self.PackageMissing(f'so please install "{requires}" to proceed.')
 
-        class PackageMissing(Exception): pass
-        class WhichPackage(Exception): pass
+        class PackageMissing(Exception):
+            pass
 
+        class WhichPackage(Exception):
+            pass

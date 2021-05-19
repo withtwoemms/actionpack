@@ -7,4 +7,3 @@ class ReadInput(Action):
 
     def instruction(self) -> str:
         return input(self.prompt)
-

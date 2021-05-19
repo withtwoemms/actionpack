@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 class WriteBytes(Action):
-    def __init__(self, filename: str, bytes_to_write: bytes, overwrite: bool=False):
+    def __init__(self, filename: str, bytes_to_write: bytes, overwrite: bool = False):
         self.path = Path(filename)
         self.overwrite = overwrite
         self.bytes_to_write = bytes_to_write
@@ -17,4 +17,3 @@ class WriteBytes(Action):
         if self.path.is_dir():
             raise IsADirectoryError(str(self.path))
         return self
-

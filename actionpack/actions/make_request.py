@@ -1,7 +1,5 @@
 from actionpack import Action
 
-from subprocess import run
-from sys import executable as python
 from validators import url as is_url
 
 
@@ -9,7 +7,7 @@ class MakeRequest(Action, requires=('requests',)):
 
     methods = ('CONNECT', 'GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE')
 
-    def __init__(self, method: str, url: str, data: dict=None, headers: dict=None, session: 'Session'=None):
+    def __init__(self, method: str, url: str, data: dict = None, headers: dict = None, session: 'Session' = None):
         self.method = method.upper()
         self.url = url
         self.method = method
@@ -17,7 +15,7 @@ class MakeRequest(Action, requires=('requests',)):
         self.headers = headers
         self.session = session
 
-    def prepare(self, method: str, url: str, data: dict=None, headers=None) -> 'Request':
+    def prepare(self, method: str, url: str, data: dict = None, headers=None) -> 'Request':
         return self.requests.Request(method, self.url, data=data, headers=headers).prepare()
 
     def instruction(self):
@@ -31,4 +29,3 @@ class MakeRequest(Action, requires=('requests',)):
         if url_validation is not True:
             raise url_validation
         return self
-

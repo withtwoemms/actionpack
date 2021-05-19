@@ -15,4 +15,3 @@ class ReadBytes(Action):
         if self.path.is_dir():
             raise IsADirectoryError(str(self.path))
         return self
-

@@ -9,4 +9,3 @@ class Call(Action):
 
     def instruction(self):
         return self.closure()
-

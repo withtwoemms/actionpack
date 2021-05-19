@@ -8,7 +8,6 @@ from tests.actionpack.actions import FakeResponse
 from oslash import Left
 from oslash import Right
 from unittest import TestCase
-from unittest.mock import Mock
 from unittest.mock import patch
 
 
@@ -16,7 +15,7 @@ class RetryPolicyTest(TestCase):
 
     def setUp(self):
         self.max_retries = 2
-        self.action =  RetryPolicy(MakeRequest('GET', 'http://localhost'), max_retries=self.max_retries)
+        self.action = RetryPolicy(MakeRequest('GET', 'http://localhost'), max_retries=self.max_retries)
 
     @patch('requests.Session.send')
     def test_can_enact_RetryPolicy(self, mock_session_send):

@@ -1,4 +1,3 @@
-from actionpack import Action
 from actionpack import KeyedProcedure
 from actionpack import Procedure
 from tests.actionpack import FakeAction
@@ -103,4 +102,3 @@ class KeyedProcedureTest(TestCase):
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
             KeyedProcedure(FakeAction(), failure)
-

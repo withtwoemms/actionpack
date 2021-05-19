@@ -31,4 +31,3 @@ class CallTest(TestCase):
 
         self.assertTrue(pickleable(self.action))
         self.assertEqual(unpickled.__dict__, self.action.__dict__)
-

@@ -1,8 +1,6 @@
 import json
 import pickle
 
-from actionpack import Action
-from actionpack import Procedure
 from actionpack.actions.serialization import Serialization
 from actionpack.utils import pickleable
 
@@ -70,4 +68,3 @@ class SerializationTest(TestCase):
 
         self.assertTrue(pickleable(action))
         self.assertEqual(str(unpickled.__dict__), str(action.__dict__))
-

@@ -11,7 +11,6 @@ from oslash import Left
 from oslash import Right
 from threading import Thread
 from unittest import TestCase
-from unittest.mock import patch
 
 
 class ActionTest(TestCase):
@@ -72,4 +71,3 @@ class ActionTest(TestCase):
         name2 = 'different name'
         action.name = name2
         self.assertEqual(action.name, name2)
-

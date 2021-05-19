@@ -6,8 +6,6 @@ from tests.actionpack.actions import FakeResponse
 
 from oslash import Left
 from oslash import Right
-from requests import Response
-from requests.exceptions import MissingSchema
 from types import ModuleType
 from unittest import TestCase
 from unittest.mock import patch
@@ -47,4 +45,3 @@ class MakeRequestTest(TestCase):
 
         self.assertTrue(pickleable(self.action))
         self.assertEqual(unpickled.__dict__, self.action.__dict__)
-

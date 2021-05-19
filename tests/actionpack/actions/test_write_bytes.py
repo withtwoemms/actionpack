@@ -1,6 +1,5 @@
 import pickle
 
-from actionpack import Action
 from actionpack.actions import WriteBytes
 from actionpack.utils import pickleable
 from tests.actionpack import FakeFile
@@ -29,7 +28,6 @@ class WriteBytesTest(TestCase):
     def test_can_overWriteBytes(self, mock_output):
         file = FakeFile(self.salutation, 'wb')
         mock_output.return_value = file
-        action = WriteBytes('valid/path/to/file', self.question, overwrite=True)
         result = self.action.perform()
 
         self.assertEqual(file.read(), self.question)
@@ -41,4 +39,3 @@ class WriteBytesTest(TestCase):
 
         self.assertTrue(pickleable(self.action))
         self.assertEqual(unpickled.__dict__, self.action.__dict__)
-

@@ -54,7 +54,8 @@ class UtilsTest(TestCase):
         self.assertFalse(pickleable(CannotPickleMe()))
 
 
-class CanPickleMe: pass
+class CanPickleMe:
+    pass
 
 
 class CannotPickleMe:
@@ -65,6 +66,6 @@ class CannotPickleMe:
 def function(*args, **kwargs):
     return args, kwargs
 
+
 arg = 'arg'
 kwarg = 'kwarg'
-

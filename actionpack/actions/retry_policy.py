@@ -9,7 +9,7 @@ from typing import Union
 
 
 class RetryPolicy(Action):
-    def __init__(self, action: Action, max_retries: int, delay_between_attempts: int=0):
+    def __init__(self, action: Action, max_retries: int, delay_between_attempts: int = 0):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
@@ -26,7 +26,7 @@ class RetryPolicy(Action):
         finally:
             return self
 
-    def enact(self, with_delay: int=0, counter: int=0) -> Union[Left, Right]:
+    def enact(self, with_delay: int = 0, counter: int = 0) -> Union[Left, Right]:
         result = self.action.perform()
         for _tally in tally(self.max_retries):
             if isinstance(result, Right):
@@ -48,5 +48,5 @@ class RetryPolicy(Action):
             delay='' if not self.delay_between_attempts else f' | {self.delay_between_attempts}s delay'
         )
 
-    class Expired(Exception): pass
-
+    class Expired(Exception):
+        pass

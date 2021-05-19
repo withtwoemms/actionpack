@@ -1,7 +1,6 @@
 import pickle
 
 from functools import wraps
-from itertools import chain
 from typing import Callable
 from typing import Optional
 
@@ -27,7 +26,8 @@ class Closure:
     def __eq__(self, other):
         return hash(self) == hash(other)
 
-    class LambdaNotAllowed(Exception): pass
+    class LambdaNotAllowed(Exception):
+        pass
 
 
 def tally(num=1):
@@ -51,4 +51,3 @@ def synchronized(lock):
                 return f(*args, **kw)
         return newFunction
     return wrap
-

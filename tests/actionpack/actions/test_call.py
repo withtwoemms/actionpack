@@ -11,7 +11,7 @@ from unittest import TestCase
 class CallTest(TestCase):
 
     @classmethod
-    def function(*args, **kwargs):
+    def function(*args, **kwargs) -> tuple:
         return args[1:], kwargs
 
     def setUp(self):

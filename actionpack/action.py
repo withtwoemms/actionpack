@@ -2,26 +2,49 @@ from actionpack.utils import synchronized
 
 from oslash import Left
 from oslash import Right
+from oslash.either import Either
 from string import Template
 from subprocess import PIPE
 from subprocess import run
 from sys import executable as python
 from threading import RLock
+from typing import Optional
+from typing import Generic
+from typing import TypeVar
 from typing import Union
 
 
-class Action:
+T = TypeVar('T')
+ResultValue = Union[T, Exception]
+
+
+class Result(Generic[T]):
+    def __init__(self, outcome: Either):
+        self.value: Optional[ResultValue[T]] = None
+        if isinstance(outcome, Right):
+            self.value = outcome.value
+        elif isinstance(outcome, Left):
+            self.value = outcome.value
+        else:
+            raise self.OutcomeMustBeOfTypeEither
+
+    class OutcomeMustBeOfTypeEither:
+        pass
+
+
+class Action(Generic[T]):
 
     _name = None
 
     lock = RLock()
 
-    def _perform(self, should_raise: bool = False) -> Union[Left, Right]:
+    def _perform(self, should_raise: bool = False) -> Result[T]:
         if not callable(self.instruction):
-            return Left(TypeError(f'Must be callable: {self.instruction}'))
-
+            outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
+            return Result(outcome)
         try:
-            return Right(self.validate().instruction())
+            outcome = Right(self.validate().instruction())
+            return Result(outcome)
         except Exception as e:
             if should_raise:
                 raise e
@@ -35,7 +58,7 @@ class Action:
                 setattr(cls, requirement, __import__(requirement))
 
     @synchronized(lock)
-    def perform(self, should_raise: bool = False):
+    def perform(self, should_raise: bool = False) -> Result[T]:
         return self._perform(should_raise)
 
     def validate(self):

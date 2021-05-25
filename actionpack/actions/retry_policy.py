@@ -1,3 +1,4 @@
+from __future__ import annotations
 from string import Template
 from time import sleep
 
@@ -16,7 +17,7 @@ class RetryPolicy(Action[T, K]):
     def instruction(self) -> T:
         return self.enact(self.delay_between_attempts)
 
-    def validate(self):
+    def validate(self) -> RetryPolicy:
         try:
             if self.retries >= 0:
                 raise RetryPolicy.Expired(f'{str(self.action)} already attempted. Will not perform.')

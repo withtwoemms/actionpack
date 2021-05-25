@@ -1,3 +1,4 @@
+from __future__ import annotations
 from oslash import Left
 from oslash import Right
 from oslash.either import Either
@@ -66,7 +67,7 @@ class Action(Generic[T, K]):
     def validate(self):
         return self
 
-    def set(self, **kwargs) -> 'Action':
+    def set(self, **kwargs) -> Action:
         self._name: Optional[K] = kwargs.get('name')
         return self
 

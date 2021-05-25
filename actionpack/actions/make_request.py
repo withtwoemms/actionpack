@@ -25,13 +25,13 @@ class MakeRequest(Action[T, K], requires=('requests',)):
         self.session = session
 
     def prepare(self, method: str, url: str, data: dict = None, headers=None) -> Request:
-        return self.requests.Request(method, self.url, data=data, headers=headers).prepare()
+        return self.requests.Request(method, url, data=data, headers=headers).prepare()
 
     def instruction(self) -> Response:
         request = self.prepare(self.method, self.url, self.data, self.headers)
         return (self.session if self.session else self.requests.Session()).send(request)
 
-    def validate(self):
+    def validate(self) -> MakeRequest[T, K]:
         if self.method not in self.methods:
             raise ValueError(f'Invalid HTTP method: {self.method}')
         url_validation = is_url(self.url)

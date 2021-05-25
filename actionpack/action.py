@@ -15,6 +15,7 @@ from typing import Union
 
 
 T = TypeVar('T')
+K = TypeVar('K')
 ResultValue = Union[T, Exception]
 
 
@@ -32,9 +33,9 @@ class Result(Generic[T]):
         pass
 
 
-class Action(Generic[T]):
+class Action(Generic[T, K]):
 
-    _name = None
+    _name: Optional[K] = None
 
     lock = RLock()
 
@@ -48,7 +49,8 @@ class Action(Generic[T]):
         except Exception as e:
             if should_raise:
                 raise e
-            return Left(e)
+            outcome = Left(e)
+            return Result(outcome)
 
     def __init_subclass__(cls, requires=None):
         cls.requires = requires
@@ -65,19 +67,19 @@ class Action(Generic[T]):
         return self
 
     def set(self, **kwargs) -> 'Action':
-        self._name = kwargs.get('name')
+        self._name: Optional[K] = kwargs.get('name')
         return self
 
     @property
-    def name(self):
+    def name(self) -> Optional[K]:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value) -> Optional[K]:
         self._name = value
 
     @name.deleter
-    def name(self):
+    def name(self) -> Optional[K]:
         del self._name
 
     def __getstate__(self):

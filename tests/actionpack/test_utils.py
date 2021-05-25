@@ -18,6 +18,7 @@ class UtilsTest(TestCase):
     def test_Closure_hashability(self):
         def another_function(*args, **kwargs):
             return args, kwargs
+        self.assertEqual(another_function(*tuple(), **dict()), (tuple(), dict()))
 
         another_kwarg = 'another_kwarg'
         closure = Closure(function, arg, kwarg=kwarg)

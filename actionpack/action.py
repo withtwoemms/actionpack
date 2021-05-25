@@ -75,11 +75,11 @@ class Action(Generic[T, K]):
         return self._name
 
     @name.setter
-    def name(self, value) -> Optional[K]:
+    def name(self, value):
         self._name = value
 
     @name.deleter
-    def name(self) -> Optional[K]:
+    def name(self):
         del self._name
 
     def __getstate__(self):

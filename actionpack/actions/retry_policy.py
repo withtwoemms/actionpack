@@ -1,20 +1,19 @@
 from actionpack import Action
+from actionpack.action import K
+from actionpack.action import T
 from actionpack.utils import tally
 
-from oslash import Left
-from oslash import Right
 from string import Template
 from time import sleep
-from typing import Union
 
 
-class RetryPolicy(Action):
-    def __init__(self, action: Action, max_retries: int, delay_between_attempts: int = 0):
+class RetryPolicy(Action[T, K]):
+    def __init__(self, action: Action[T, K], max_retries: int, delay_between_attempts: int = 0):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
 
-    def instruction(self):
+    def instruction(self) -> T:
         return self.enact(self.delay_between_attempts)
 
     def validate(self):
@@ -26,16 +25,16 @@ class RetryPolicy(Action):
         finally:
             return self
 
-    def enact(self, with_delay: int = 0, counter: int = 0) -> Union[Left, Right]:
+    def enact(self, with_delay: int = 0, counter: int = 0) -> T:
         result = self.action.perform()
         for _tally in tally(self.max_retries):
-            if isinstance(result, Right):
-                self.retries = counter
-                return result
-            else:
+            if isinstance(result.value, Exception):
                 counter += _tally
                 result = self.action.perform()
                 sleep(with_delay)
+            else:
+                self.retries = counter
+                return result.value
         self.retries = counter
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 

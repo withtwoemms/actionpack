@@ -1,8 +1,9 @@
 from actionpack import Action
+from actionpack.action import K
 from pathlib import Path
 
 
-class ReadBytes(Action):
+class ReadBytes(Action[bytes, K]):
     def __init__(self, filename: str):
         self.path = Path(filename)
 

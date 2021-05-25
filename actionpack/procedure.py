@@ -1,3 +1,5 @@
+from actionpack.action import K
+from actionpack.action import T
 from actionpack import Action
 
 from concurrent.futures import ThreadPoolExecutor
@@ -6,7 +8,7 @@ from functools import reduce
 
 
 class Procedure:
-    def __init__(self, *actions: Action):
+    def __init__(self, *actions: Action[T, K]):
         self.actions = actions
         self._actions = iter(self.actions)
 

@@ -1,9 +1,11 @@
 from actionpack import Action
+from actionpack.action import K
+from actionpack.action import T
 
 from validators import url as is_url
 
 
-class MakeRequest(Action, requires=('requests',)):
+class MakeRequest(Action[T, K], requires=('requests',)):
 
     methods = ('CONNECT', 'GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE')
 
@@ -13,12 +15,12 @@ class MakeRequest(Action, requires=('requests',)):
         self.method = method
         self.data = data
         self.headers = headers
-        self.session = session
+        self.session: 'Session' = session
 
     def prepare(self, method: str, url: str, data: dict = None, headers=None) -> 'Request':
         return self.requests.Request(method, self.url, data=data, headers=headers).prepare()
 
-    def instruction(self):
+    def instruction(self) -> 'Response':
         request = self.prepare(self.method, self.url, self.data, self.headers)
         return (self.session if self.session else self.requests.Session()).send(request)
 

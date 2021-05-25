@@ -1,8 +1,9 @@
 from actionpack import Action
+from actionpack.action import K
 from pathlib import Path
 
 
-class WriteBytes(Action):
+class WriteBytes(Action[int, K]):
     def __init__(self, filename: str, bytes_to_write: bytes, overwrite: bool = False):
         self.path = Path(filename)
         self.overwrite = overwrite

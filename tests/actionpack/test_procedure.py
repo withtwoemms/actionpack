@@ -1,14 +1,12 @@
-from actionpack import Action
+from collections.abc import Iterable
+from unittest import TestCase
+
 from actionpack import KeyedProcedure
 from actionpack import Procedure
+from actionpack.action import Result
 from tests.actionpack import FakeAction
 from tests.actionpack import FakeFile
 from tests.actionpack.actions import FakeWriteBytes
-
-from collections.abc import Iterable
-from oslash import Left
-from oslash import Right
-from unittest import TestCase
 
 
 success = FakeAction(name='success')
@@ -35,14 +33,14 @@ class ProcedureTest(TestCase):
         results = self.procedure.execute()
 
         assertIsIterable(results)
-        self.assertIsInstance(next(results), Right)
-        self.assertIsInstance(next(results), Left)
+        self.assertIsInstance(next(results), Result)
+        self.assertIsInstance(next(results), Result)
 
     def test_Procedure_execution_can_raise(self):
         results = self.procedure.execute(should_raise=True)
 
         assertIsIterable(results)
-        self.assertIsInstance(next(results), Right)
+        self.assertIsInstance(next(results), Result)
         with self.assertRaises(Exception):
             next(results)
 
@@ -63,8 +61,8 @@ class ProcedureTest(TestCase):
         results = procedure.execute(should_raise=True, synchronously=False)
 
         assertIsIterable(results)
-        self.assertIsInstance(next(results), Right)
-        self.assertIsInstance(next(results), Right)
+        self.assertIsInstance(next(results), Result)
+        self.assertIsInstance(next(results), Result)
 
         # NOTE: the wellwish precedes since the question took longer
         self.assertEqual(file.read(), wellwish + question)
@@ -76,7 +74,7 @@ class KeyedProcedureTest(TestCase):
         results = KeyedProcedure(success, failure).execute()
         results_dict = dict(results)
 
-        self.assertIsInstance(results_dict[success.name], Right)
+        self.assertIsInstance(results_dict[success.name], Result)
 
     def test_KeyedProcedure_execution_can_raise(self):
         results = KeyedProcedure(success, failure).execute(should_raise=True)
@@ -96,11 +94,10 @@ class KeyedProcedureTest(TestCase):
         ).execute()
         results_dict = dict(results)
 
-        self.assertIsInstance(results_dict[key1], Right)
-        self.assertIsInstance(results_dict[key2], Left)
-        self.assertIsInstance(results_dict[key3], Right)
+        self.assertIsInstance(results_dict[key1].value, str)
+        self.assertIsInstance(results_dict[key2].value, Exception)
+        self.assertIsInstance(results_dict[key3].value, str)
 
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
             KeyedProcedure(FakeAction(), failure)
-

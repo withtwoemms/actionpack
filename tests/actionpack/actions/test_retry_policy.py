@@ -1,22 +1,20 @@
 import pickle
 
+from unittest import TestCase
+from unittest.mock import patch
+
+from actionpack.action import Result
 from actionpack.actions import MakeRequest
 from actionpack.actions import RetryPolicy
 from actionpack.utils import pickleable
 from tests.actionpack.actions import FakeResponse
-
-from oslash import Left
-from oslash import Right
-from unittest import TestCase
-from unittest.mock import Mock
-from unittest.mock import patch
 
 
 class RetryPolicyTest(TestCase):
 
     def setUp(self):
         self.max_retries = 2
-        self.action =  RetryPolicy(MakeRequest('GET', 'http://localhost'), max_retries=self.max_retries)
+        self.action = RetryPolicy(MakeRequest('GET', 'http://localhost'), max_retries=self.max_retries)
 
     @patch('requests.Session.send')
     def test_can_enact_RetryPolicy(self, mock_session_send):
@@ -24,7 +22,7 @@ class RetryPolicyTest(TestCase):
         result = self.action.perform()
 
         self.assertEqual(self.action.retries, self.max_retries)
-        self.assertIsInstance(result, Left)
+        self.assertIsInstance(result, Result)
         self.assertIsInstance(result.value, RetryPolicy.Expired)
 
     @patch('requests.Session.send')
@@ -35,8 +33,8 @@ class RetryPolicyTest(TestCase):
         ]
         result = self.action.perform()
 
+        self.assertIsInstance(result, Result)
         self.assertEqual(self.action.retries, 1)
-        self.assertIsInstance(result, Right)
 
     @patch('requests.Session.send')
     def test_can_pickle(self, mock_session_send):

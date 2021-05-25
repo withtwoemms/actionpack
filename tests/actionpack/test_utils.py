@@ -1,8 +1,8 @@
+from unittest import TestCase
+
 from actionpack.utils import Closure
 from actionpack.utils import pickleable
 from actionpack.utils import tally
-
-from unittest import TestCase
 
 
 class UtilsTest(TestCase):
@@ -18,6 +18,7 @@ class UtilsTest(TestCase):
     def test_Closure_hashability(self):
         def another_function(*args, **kwargs):
             return args, kwargs
+        self.assertEqual(another_function(*tuple(), **dict()), (tuple(), dict()))
 
         another_kwarg = 'another_kwarg'
         closure = Closure(function, arg, kwarg=kwarg)
@@ -54,7 +55,8 @@ class UtilsTest(TestCase):
         self.assertFalse(pickleable(CannotPickleMe()))
 
 
-class CanPickleMe: pass
+class CanPickleMe:
+    pass
 
 
 class CannotPickleMe:
@@ -65,6 +67,6 @@ class CannotPickleMe:
 def function(*args, **kwargs):
     return args, kwargs
 
+
 arg = 'arg'
 kwarg = 'kwarg'
-

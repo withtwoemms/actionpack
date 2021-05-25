@@ -1,16 +1,14 @@
 import json
 import pickle
 
-from actionpack import Action
-from actionpack import Procedure
-from actionpack.actions.serialization import Serialization
-from actionpack.utils import pickleable
-
 from datetime import datetime
 from marshmallow import Schema
 from marshmallow import fields
-from oslash import Right
 from unittest import TestCase
+
+from actionpack.action import Result
+from actionpack.actions.serialization import Serialization
+from actionpack.utils import pickleable
 
 
 class SerializationTest(TestCase):
@@ -38,7 +36,7 @@ class SerializationTest(TestCase):
         serialization = Serialization(self.UserSchema(), self.user)
         result = serialization.perform()
 
-        self.assertIsInstance(result, Right)
+        self.assertIsInstance(result, Result)
         self.assertIsInstance(result.value, str)
         self.assertTrue(json.loads(result.value))
 
@@ -46,21 +44,21 @@ class SerializationTest(TestCase):
         deserialization = Serialization(self.UserSchema(), json.dumps(self.user_dict), inverse=True)
         result = deserialization.perform()
 
-        self.assertIsInstance(result, Right)
+        self.assertIsInstance(result, Result)
         self.assertIsInstance(self.User(**result.value), self.User)
 
     def test_can_serialize_pickle(self):
         spickle = Serialization(pickle, self.user)
         serialized = spickle.perform()
 
-        self.assertIsInstance(serialized, Right)
+        self.assertIsInstance(serialized, Result)
         self.assertIsInstance(serialized.value, bytes)
 
     def test_can_deserialize_pickle(self):
         respickle = Serialization(pickle, pickleable(self.user), inverse=True)
         deserialized = respickle.perform()
 
-        self.assertIsInstance(deserialized, Right)
+        self.assertIsInstance(deserialized, Result)
         self.assertIsInstance(deserialized.value, self.User)
 
     def test_can_pickle(self):
@@ -70,4 +68,3 @@ class SerializationTest(TestCase):
 
         self.assertTrue(pickleable(action))
         self.assertEqual(str(unpickled.__dict__), str(action.__dict__))
-

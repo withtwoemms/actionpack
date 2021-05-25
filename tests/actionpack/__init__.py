@@ -1,17 +1,19 @@
-from actionpack import Action
 from io import BytesIO
 
+from actionpack import Action
+from actionpack.action import K
 
-class FakeAction(Action):
 
-    result = f'Performing Action.'
+class FakeAction(Action[str, K]):
 
-    def __init__(self, name=None, exception=None):
+    result = 'Performing Action.'
+
+    def __init__(self, name: K = None, exception=None):
         self.name = name
         self.exception = exception
         self.state = {'this': 'state'}
 
-    def instruction(self):
+    def instruction(self) -> str:
         return self.result
 
     def validate(self):
@@ -21,7 +23,7 @@ class FakeAction(Action):
 
 
 class FakeFile:
-    def __init__(self, contents: bytes=bytes(), mode: str=None):
+    def __init__(self, contents: bytes = bytes(), mode: str = None):
         self.buffer = BytesIO(contents)
         self.buffer.read()
         self.mode = mode
@@ -42,4 +44,3 @@ class FakeFile:
 
     def __exit__(self, *args):
         self.closed = True
-

@@ -1,10 +1,10 @@
+from actionpack.action import Result
 import pickle
 
 from actionpack.actions import Call
 from actionpack.utils import Closure
 from actionpack.utils import pickleable
 
-from oslash import Right
 from unittest import TestCase
 
 
@@ -22,7 +22,7 @@ class CallTest(TestCase):
 
     def test_can_Call(self):
         result = self.action.perform()
-        self.assertIsInstance(result, Right)
+        self.assertIsInstance(result, Result)
         self.assertEqual(result.value, ((self.arg,), {self.kwarg: self.kwarg}))
 
     def test_can_pickle(self):

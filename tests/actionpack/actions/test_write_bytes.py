@@ -1,5 +1,6 @@
 import pickle
 
+from actionpack.action import Result
 from actionpack.actions import WriteBytes
 from actionpack.utils import pickleable
 from tests.actionpack import FakeFile
@@ -22,6 +23,7 @@ class WriteBytesTest(TestCase):
         result = self.action.perform()
 
         self.assertEqual(file.read(), self.salutation + self.question)
+        self.assertIsInstance(result, Result)
         self.assertEqual(result.value, len(self.question))
 
     @patch('pathlib.Path.open')

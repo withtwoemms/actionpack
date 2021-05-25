@@ -1,15 +1,15 @@
 import pickle
 
+from functools import reduce
+from threading import Thread
+from unittest import TestCase
+
 from actionpack import Action
 from actionpack.action import Result
 from actionpack.utils import pickleable
 from tests.actionpack import FakeAction
 from tests.actionpack import FakeFile
 from tests.actionpack.actions import FakeWriteBytes
-
-from functools import reduce
-from threading import Thread
-from unittest import TestCase
 
 
 class ActionTest(TestCase):

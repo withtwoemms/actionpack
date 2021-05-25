@@ -1,5 +1,3 @@
-from actionpack.utils import synchronized
-
 from oslash import Left
 from oslash import Right
 from oslash.either import Either
@@ -12,6 +10,8 @@ from typing import Optional
 from typing import Generic
 from typing import TypeVar
 from typing import Union
+
+from actionpack.utils import synchronized
 
 
 T = TypeVar('T')

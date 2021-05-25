@@ -1,11 +1,11 @@
-from actionpack.action import Result
 import pickle
 
+from unittest import TestCase
+
+from actionpack.action import Result
 from actionpack.actions import Call
 from actionpack.utils import Closure
 from actionpack.utils import pickleable
-
-from unittest import TestCase
 
 
 class CallTest(TestCase):

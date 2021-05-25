@@ -1,6 +1,7 @@
+from io import BytesIO
+
 from actionpack import Action
 from actionpack.action import K
-from io import BytesIO
 
 
 class FakeAction(Action[str, K]):

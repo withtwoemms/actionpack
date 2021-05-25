@@ -1,8 +1,8 @@
+from validators import url as is_url
+
 from actionpack import Action
 from actionpack.action import K
 from actionpack.action import T
-
-from validators import url as is_url
 
 
 class MakeRequest(Action[T, K], requires=('requests',)):

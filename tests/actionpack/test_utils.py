@@ -1,8 +1,8 @@
+from unittest import TestCase
+
 from actionpack.utils import Closure
 from actionpack.utils import pickleable
 from actionpack.utils import tally
-
-from unittest import TestCase
 
 
 class UtilsTest(TestCase):

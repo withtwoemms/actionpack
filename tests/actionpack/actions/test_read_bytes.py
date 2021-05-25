@@ -1,12 +1,12 @@
-from actionpack.action import Result
 import pickle
-
-from actionpack.actions import ReadBytes
-from actionpack.utils import pickleable
 
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
+
+from actionpack.action import Result
+from actionpack.actions import ReadBytes
+from actionpack.utils import pickleable
 
 
 class ReadBytesTest(TestCase):

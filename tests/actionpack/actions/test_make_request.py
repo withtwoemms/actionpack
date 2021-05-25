@@ -1,14 +1,14 @@
 import pickle
 
-from actionpack.action import Result
-from actionpack.actions import MakeRequest
-from actionpack.utils import pickleable
-from tests.actionpack.actions import FakeResponse
-
 from types import ModuleType
 from unittest import TestCase
 from unittest.mock import patch
 from validators import ValidationFailure
+
+from actionpack.action import Result
+from actionpack.actions import MakeRequest
+from actionpack.utils import pickleable
+from tests.actionpack.actions import FakeResponse
 
 
 class MakeRequestTest(TestCase):

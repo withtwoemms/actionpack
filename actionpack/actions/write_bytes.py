@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from actionpack import Action
 from actionpack.action import K
-from pathlib import Path
 
 
 class WriteBytes(Action[int, K]):

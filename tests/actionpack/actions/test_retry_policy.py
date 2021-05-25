@@ -1,13 +1,13 @@
 import pickle
 
+from unittest import TestCase
+from unittest.mock import patch
+
 from actionpack.action import Result
 from actionpack.actions import MakeRequest
 from actionpack.actions import RetryPolicy
 from actionpack.utils import pickleable
 from tests.actionpack.actions import FakeResponse
-
-from unittest import TestCase
-from unittest.mock import patch
 
 
 class RetryPolicyTest(TestCase):

@@ -1,12 +1,12 @@
 import pickle
 
+from unittest import TestCase
+from unittest.mock import patch
+
 from actionpack.action import Result
 from actionpack.actions import WriteBytes
 from actionpack.utils import pickleable
 from tests.actionpack import FakeFile
-
-from unittest import TestCase
-from unittest.mock import patch
 
 
 class WriteBytesTest(TestCase):

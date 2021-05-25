@@ -1,14 +1,14 @@
 import json
 import pickle
 
-from actionpack.action import Result
-from actionpack.actions.serialization import Serialization
-from actionpack.utils import pickleable
-
 from datetime import datetime
 from marshmallow import Schema
 from marshmallow import fields
 from unittest import TestCase
+
+from actionpack.action import Result
+from actionpack.actions.serialization import Serialization
+from actionpack.utils import pickleable
 
 
 class SerializationTest(TestCase):

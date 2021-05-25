@@ -1,9 +1,9 @@
+from requests import Response
+from time import sleep
+
 from actionpack import Action
 from actionpack.action import K
 from tests.actionpack import FakeFile
-
-from requests import Response
-from time import sleep
 
 
 class FakeResponse(Response):

@@ -1,10 +1,10 @@
+from string import Template
+from time import sleep
+
 from actionpack import Action
 from actionpack.action import K
 from actionpack.action import T
 from actionpack.utils import tally
-
-from string import Template
-from time import sleep
 
 
 class RetryPolicy(Action[T, K]):

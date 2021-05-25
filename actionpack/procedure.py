@@ -1,10 +1,10 @@
-from actionpack.action import K
-from actionpack.action import T
-from actionpack import Action
-
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from functools import reduce
+
+from actionpack.action import K
+from actionpack.action import T
+from actionpack import Action
 
 
 class Procedure:

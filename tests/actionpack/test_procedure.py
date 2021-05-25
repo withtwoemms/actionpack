@@ -1,12 +1,12 @@
-from actionpack.action import Result
+from collections.abc import Iterable
+from unittest import TestCase
+
 from actionpack import KeyedProcedure
 from actionpack import Procedure
+from actionpack.action import Result
 from tests.actionpack import FakeAction
 from tests.actionpack import FakeFile
 from tests.actionpack.actions import FakeWriteBytes
-
-from collections.abc import Iterable
-from unittest import TestCase
 
 
 success = FakeAction(name='success')

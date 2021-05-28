@@ -15,14 +15,14 @@ from typing import Union
 from actionpack.utils import synchronized
 
 
-T = TypeVar('T')
-K = TypeVar('K')
-ResultValue = Union[T, Exception]
+Outcome = TypeVar('Outcome')
+Name = TypeVar('Name')
+ResultValue = Union[Outcome, Exception]
 
 
-class Result(Generic[T]):
+class Result(Generic[Outcome]):
     def __init__(self, outcome: Either):
-        self.value: Optional[ResultValue[T]] = None
+        self.value: Optional[ResultValue[Outcome]] = None
         if isinstance(outcome, Right):
             self.value = outcome.value
         elif isinstance(outcome, Left):
@@ -34,13 +34,13 @@ class Result(Generic[T]):
         pass
 
 
-class Action(Generic[T, K]):
+class Action(Generic[Outcome, Name]):
 
-    _name: Optional[K] = None
+    _name: Optional[Name] = None
 
     lock = RLock()
 
-    def _perform(self, should_raise: bool = False) -> Result[T]:
+    def _perform(self, should_raise: bool = False) -> Result[Outcome]:
         if not callable(self.instruction):
             outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
             return Result(outcome)
@@ -61,18 +61,18 @@ class Action(Generic[T, K]):
                 setattr(cls, requirement, __import__(requirement))
 
     @synchronized(lock)
-    def perform(self, should_raise: bool = False) -> Result[T]:
+    def perform(self, should_raise: bool = False) -> Result[Outcome]:
         return self._perform(should_raise)
 
     def validate(self):
         return self
 
-    def set(self, **kwargs) -> Action[T, K]:
-        self._name: Optional[K] = kwargs.get('name')
+    def set(self, **kwargs) -> Action[Outcome, Name]:
+        self._name: Optional[Name] = kwargs.get('name')
         return self
 
     @property
-    def name(self) -> Optional[K]:
+    def name(self) -> Optional[Name]:
         return self._name
 
     @name.setter

@@ -3,18 +3,18 @@ from string import Template
 from time import sleep
 
 from actionpack import Action
-from actionpack.action import K
-from actionpack.action import T
+from actionpack.action import Name
+from actionpack.action import Outcome
 from actionpack.utils import tally
 
 
-class RetryPolicy(Action[T, K]):
-    def __init__(self, action: Action[T, K], max_retries: int, delay_between_attempts: int = 0):
+class RetryPolicy(Action[Outcome, Name]):
+    def __init__(self, action: Action[Outcome, Name], max_retries: int, delay_between_attempts: int = 0):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
 
-    def instruction(self) -> T:
+    def instruction(self) -> Outcome:
         return self.enact(self.delay_between_attempts)
 
     def validate(self) -> RetryPolicy:
@@ -26,7 +26,7 @@ class RetryPolicy(Action[T, K]):
         finally:
             return self
 
-    def enact(self, with_delay: int = 0, counter: int = 0) -> T:
+    def enact(self, with_delay: int = 0, counter: int = 0) -> Outcome:
         result = self.action.perform()
         for _tally in tally(self.max_retries):
             if isinstance(result.value, Exception):

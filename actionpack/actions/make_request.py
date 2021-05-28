@@ -3,8 +3,8 @@ from typing import TypeVar
 from validators import url as is_url
 
 from actionpack import Action
-from actionpack.action import K
-from actionpack.action import T
+from actionpack.action import Name
+from actionpack.action import Outcome
 
 
 Session = TypeVar('Session')
@@ -12,7 +12,7 @@ Request = TypeVar('Request')
 Response = TypeVar('Response')
 
 
-class MakeRequest(Action[T, K], requires=('requests',)):
+class MakeRequest(Action[Outcome, Name], requires=('requests',)):
 
     methods = ('CONNECT', 'GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE')
 
@@ -31,7 +31,7 @@ class MakeRequest(Action[T, K], requires=('requests',)):
         request = self.prepare(self.method, self.url, self.data, self.headers)
         return (self.session if self.session else self.requests.Session()).send(request)
 
-    def validate(self) -> MakeRequest[T, K]:
+    def validate(self) -> MakeRequest[Outcome, Name]:
         if self.method not in self.methods:
             raise ValueError(f'Invalid HTTP method: {self.method}')
         url_validation = is_url(self.url)

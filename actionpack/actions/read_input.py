@@ -1,8 +1,8 @@
 from actionpack import Action
-from actionpack.action import K
+from actionpack.action import Name
 
 
-class ReadInput(Action[str, K]):
+class ReadInput(Action[str, Name]):
     def __init__(self, prompt: str):
         self.prompt = prompt
 

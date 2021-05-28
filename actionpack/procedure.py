@@ -2,13 +2,13 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from functools import reduce
 
-from actionpack.action import K
-from actionpack.action import T
+from actionpack.action import Name
+from actionpack.action import Outcome
 from actionpack import Action
 
 
 class Procedure:
-    def __init__(self, *actions: Action[T, K]):
+    def __init__(self, *actions: Action[Outcome, Name]):
         self.actions = actions
         self._actions = iter(self.actions)
 

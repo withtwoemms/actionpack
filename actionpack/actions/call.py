@@ -1,12 +1,12 @@
 from actionpack import Action
-from actionpack.action import K
-from actionpack.action import T
+from actionpack.action import Name
+from actionpack.action import Outcome
 from actionpack.utils import Closure
 
 
-class Call(Action[T, K]):
-    def __init__(self, closure: Closure[T]):
+class Call(Action[Outcome, Name]):
+    def __init__(self, closure: Closure[Outcome]):
         self.closure = closure
 
-    def instruction(self) -> T:
+    def instruction(self) -> Outcome:
         return self.closure()

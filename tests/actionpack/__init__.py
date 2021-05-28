@@ -1,14 +1,15 @@
 from io import BytesIO
 
 from actionpack import Action
-from actionpack.action import K
+from actionpack.action import Name
+from actionpack.action import Outcome
 
 
-class FakeAction(Action[str, K]):
+class FakeAction(Action[Name, Outcome]):
 
     result = 'Performing Action.'
 
-    def __init__(self, name: K = None, exception=None):
+    def __init__(self, name: Name = None, exception=None):
         self.name = name
         self.exception = exception
         self.state = {'this': 'state'}

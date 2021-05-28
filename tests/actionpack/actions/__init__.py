@@ -2,7 +2,7 @@ from requests import Response
 from time import sleep
 
 from actionpack import Action
-from actionpack.action import K
+from actionpack.action import Name
 from tests.actionpack import FakeFile
 
 
@@ -12,7 +12,7 @@ class FakeResponse(Response):
         self.status_code = status
 
 
-class FakeWriteBytes(Action[int, K]):
+class FakeWriteBytes(Action[Name, int]):
     def __init__(self, file: FakeFile, bytes_to_write: bytes, delay: float):
         self.bytes_to_write = bytes_to_write
         self.delay = delay

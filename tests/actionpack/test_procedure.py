@@ -54,10 +54,10 @@ class ProcedureTest(TestCase):
         question = b' How are you?'
         wellwish = b' I hope you\'re well.'
 
-        action1 = FakeWriteBytes(file, question, delay=0.2)
-        action2 = FakeWriteBytes(file, wellwish, delay=0.1)
+        action1 = FakeWriteBytes[str, int](file, question, delay=0.2)
+        action2 = FakeWriteBytes[str, int](file, wellwish, delay=0.1)
 
-        procedure = Procedure(action1, action2)
+        procedure = Procedure[str, int](*[action1, action2])
         results = procedure.execute(should_raise=True, synchronously=False)
 
         assertIsIterable(results)
@@ -71,7 +71,7 @@ class ProcedureTest(TestCase):
 class KeyedProcedureTest(TestCase):
 
     def test_can_create_KeyedProcedure(self):
-        results = KeyedProcedure(success, failure).execute()
+        results = KeyedProcedure[str, str](success, failure).execute()
         results_dict = dict(results)
 
         self.assertIsInstance(results_dict[success.name], Result)
@@ -85,8 +85,12 @@ class KeyedProcedureTest(TestCase):
             next(results)
 
     def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
-        action1, action2, action3 = FakeAction(), FakeAction(exception=Exception()), FakeAction()
+        action1 = FakeAction[int, str]()
+        action2 = FakeAction[bool, str](exception=Exception())
+        action3 = FakeAction[float, str]()
+
         key1, key2, key3 = 1, False, 1.01
+
         results = KeyedProcedure(
             action1.set(name=key1),
             action2.set(name=key2),

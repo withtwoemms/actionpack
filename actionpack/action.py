@@ -15,14 +15,14 @@ from typing import Union
 from actionpack.utils import synchronized
 
 
-T = TypeVar('T')
-K = TypeVar('K')
-ResultValue = Union[T, Exception]
+Outcome = TypeVar('Outcome')
+Name = TypeVar('Name')
+ResultValue = Union[Outcome, Exception]
 
 
-class Result(Generic[T]):
+class Result(Generic[Outcome]):
     def __init__(self, outcome: Either):
-        self.value: Optional[ResultValue[T]] = None
+        self.value: Optional[ResultValue[Outcome]] = None
         if isinstance(outcome, Right):
             self.value = outcome.value
         elif isinstance(outcome, Left):
@@ -30,17 +30,43 @@ class Result(Generic[T]):
         else:
             raise self.OutcomeMustBeOfTypeEither
 
-    class OutcomeMustBeOfTypeEither:
+    class OutcomeMustBeOfTypeEither(Exception):
         pass
 
 
-class Action(Generic[T, K]):
+class Action(Generic[Name, Outcome]):
 
-    _name: Optional[K] = None
+    _name: Optional[Name] = None
 
     lock = RLock()
 
-    def _perform(self, should_raise: bool = False) -> Result[T]:
+    def instruction(self):
+        pass
+
+    @synchronized(lock)
+    def perform(self, should_raise: bool = False) -> Result[Outcome]:
+        return self._perform(should_raise)
+
+    def validate(self):
+        return self
+
+    def set(self, **kwargs) -> Action[Name, Outcome]:
+        self._name: Optional[Name] = kwargs.get('name')
+        return self
+
+    @property
+    def name(self) -> Optional[Name]:
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @name.deleter
+    def name(self):
+        del self._name
+
+    def _perform(self, should_raise: bool = False) -> Result[Outcome]:
         if not callable(self.instruction):
             outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
             return Result(outcome)
@@ -59,29 +85,6 @@ class Action(Generic[T, K]):
             for requirement in requires:
                 Action.DependencyCheck(requirement)
                 setattr(cls, requirement, __import__(requirement))
-
-    @synchronized(lock)
-    def perform(self, should_raise: bool = False) -> Result[T]:
-        return self._perform(should_raise)
-
-    def validate(self):
-        return self
-
-    def set(self, **kwargs) -> Action:
-        self._name: Optional[K] = kwargs.get('name')
-        return self
-
-    @property
-    def name(self) -> Optional[K]:
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
-
-    @name.deleter
-    def name(self):
-        del self._name
 
     def __getstate__(self):
         return vars(self)

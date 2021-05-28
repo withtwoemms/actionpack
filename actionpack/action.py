@@ -30,7 +30,7 @@ class Result(Generic[Outcome]):
         else:
             raise self.OutcomeMustBeOfTypeEither
 
-    class OutcomeMustBeOfTypeEither:
+    class OutcomeMustBeOfTypeEither(Exception):
         pass
 
 
@@ -40,25 +40,8 @@ class Action(Generic[Outcome, Name]):
 
     lock = RLock()
 
-    def _perform(self, should_raise: bool = False) -> Result[Outcome]:
-        if not callable(self.instruction):
-            outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
-            return Result(outcome)
-        try:
-            outcome = Right(self.validate().instruction())
-            return Result(outcome)
-        except Exception as e:
-            if should_raise:
-                raise e
-            outcome = Left(e)
-            return Result(outcome)
-
-    def __init_subclass__(cls, requires=None):
-        cls.requires = requires
-        if cls.requires:
-            for requirement in requires:
-                Action.DependencyCheck(requirement)
-                setattr(cls, requirement, __import__(requirement))
+    def instruction(self):
+        pass
 
     @synchronized(lock)
     def perform(self, should_raise: bool = False) -> Result[Outcome]:
@@ -82,6 +65,26 @@ class Action(Generic[Outcome, Name]):
     @name.deleter
     def name(self):
         del self._name
+
+    def _perform(self, should_raise: bool = False) -> Result[Outcome]:
+        if not callable(self.instruction):
+            outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
+            return Result(outcome)
+        try:
+            outcome = Right(self.validate().instruction())
+            return Result(outcome)
+        except Exception as e:
+            if should_raise:
+                raise e
+            outcome = Left(e)
+            return Result(outcome)
+
+    def __init_subclass__(cls, requires=None):
+        cls.requires = requires
+        if cls.requires:
+            for requirement in requires:
+                Action.DependencyCheck(requirement)
+                setattr(cls, requirement, __import__(requirement))
 
     def __getstate__(self):
         return vars(self)

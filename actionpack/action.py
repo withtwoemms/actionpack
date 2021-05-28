@@ -67,7 +67,7 @@ class Action(Generic[T, K]):
     def validate(self):
         return self
 
-    def set(self, **kwargs) -> Action:
+    def set(self, **kwargs) -> Action[T, K]:
         self._name: Optional[K] = kwargs.get('name')
         return self
 

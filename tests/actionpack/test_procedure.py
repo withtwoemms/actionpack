@@ -85,8 +85,12 @@ class KeyedProcedureTest(TestCase):
             next(results)
 
     def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
-        action1, action2, action3 = FakeAction(), FakeAction(exception=Exception()), FakeAction()
+        action1 = FakeAction[str, int]()
+        action2 = FakeAction[str, bool](exception=Exception())
+        action3 = FakeAction[str, float]()
+
         key1, key2, key3 = 1, False, 1.01
+
         results = KeyedProcedure(
             action1.set(name=key1),
             action2.set(name=key2),

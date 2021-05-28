@@ -2,9 +2,10 @@ from io import BytesIO
 
 from actionpack import Action
 from actionpack.action import K
+from actionpack.action import T
 
 
-class FakeAction(Action[str, K]):
+class FakeAction(Action[T, K]):
 
     result = 'Performing Action.'
 

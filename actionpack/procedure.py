@@ -12,7 +12,7 @@ from actionpack import Action
 
 
 class Procedure(Generic[Name, Outcome]):
-    def __init__(self, *actions: Action[Outcome, Name]):
+    def __init__(self, *actions: Action[Name, Outcome]):
         self.actions = actions
         self._actions = iter(self.actions)
 

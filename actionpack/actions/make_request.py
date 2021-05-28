@@ -12,7 +12,7 @@ Request = TypeVar('Request')
 Response = TypeVar('Response')
 
 
-class MakeRequest(Action[Outcome, Name], requires=('requests',)):
+class MakeRequest(Action[Name, Outcome], requires=('requests',)):
 
     methods = ('CONNECT', 'GET', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE')
 
@@ -31,7 +31,7 @@ class MakeRequest(Action[Outcome, Name], requires=('requests',)):
         request = self.prepare(self.method, self.url, self.data, self.headers)
         return (self.session if self.session else self.requests.Session()).send(request)
 
-    def validate(self) -> MakeRequest[Outcome, Name]:
+    def validate(self) -> MakeRequest[Name, Outcome]:
         if self.method not in self.methods:
             raise ValueError(f'Invalid HTTP method: {self.method}')
         url_validation = is_url(self.url)

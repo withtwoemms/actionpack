@@ -8,8 +8,8 @@ from actionpack.action import Outcome
 from actionpack.utils import tally
 
 
-class RetryPolicy(Action[Outcome, Name]):
-    def __init__(self, action: Action[Outcome, Name], max_retries: int, delay_between_attempts: int = 0):
+class RetryPolicy(Action[Name, Outcome]):
+    def __init__(self, action: Action[Name, Outcome], max_retries: int, delay_between_attempts: int = 0):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts

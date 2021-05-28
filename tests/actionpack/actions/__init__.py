@@ -12,7 +12,7 @@ class FakeResponse(Response):
         self.status_code = status
 
 
-class FakeWriteBytes(Action[int, Name]):
+class FakeWriteBytes(Action[Name, int]):
     def __init__(self, file: FakeFile, bytes_to_write: bytes, delay: float):
         self.bytes_to_write = bytes_to_write
         self.delay = delay

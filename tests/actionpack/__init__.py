@@ -5,7 +5,7 @@ from actionpack.action import Name
 from actionpack.action import Outcome
 
 
-class FakeAction(Action[Outcome, Name]):
+class FakeAction(Action[Name, Outcome]):
 
     result = 'Performing Action.'
 

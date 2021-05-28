@@ -34,7 +34,7 @@ class Result(Generic[Outcome]):
         pass
 
 
-class Action(Generic[Outcome, Name]):
+class Action(Generic[Name, Outcome]):
 
     _name: Optional[Name] = None
 
@@ -50,7 +50,7 @@ class Action(Generic[Outcome, Name]):
     def validate(self):
         return self
 
-    def set(self, **kwargs) -> Action[Outcome, Name]:
+    def set(self, **kwargs) -> Action[Name, Outcome]:
         self._name: Optional[Name] = kwargs.get('name')
         return self
 

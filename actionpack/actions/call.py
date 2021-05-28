@@ -4,7 +4,7 @@ from actionpack.action import Outcome
 from actionpack.utils import Closure
 
 
-class Call(Action[Outcome, Name]):
+class Call(Action[Name, Outcome]):
     def __init__(self, closure: Closure[Outcome]):
         self.closure = closure
 

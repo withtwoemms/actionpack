@@ -54,8 +54,8 @@ class ProcedureTest(TestCase):
         question = b' How are you?'
         wellwish = b' I hope you\'re well.'
 
-        action1 = FakeWriteBytes[int, str](file, question, delay=0.2)
-        action2 = FakeWriteBytes[int, str](file, wellwish, delay=0.1)
+        action1 = FakeWriteBytes[str, int](file, question, delay=0.2)
+        action2 = FakeWriteBytes[str, int](file, wellwish, delay=0.1)
 
         procedure = Procedure[str, int](*[action1, action2])
         results = procedure.execute(should_raise=True, synchronously=False)
@@ -85,9 +85,9 @@ class KeyedProcedureTest(TestCase):
             next(results)
 
     def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
-        action1 = FakeAction[str, int]()
-        action2 = FakeAction[str, bool](exception=Exception())
-        action3 = FakeAction[str, float]()
+        action1 = FakeAction[int, str]()
+        action2 = FakeAction[bool, str](exception=Exception())
+        action3 = FakeAction[float, str]()
 
         key1, key2, key3 = 1, False, 1.01
 

@@ -1,20 +1,24 @@
 import pickle
 
 from functools import wraps
-from itertools import chain
 from typing import Callable
+from typing import Generic
 from typing import Optional
+from typing import TypeVar
 
 
-class Closure:
-    def __init__(self, func: Callable, *args, **kwargs):
+T = TypeVar('T')
+
+
+class Closure(Generic[T]):
+    def __init__(self, func: Callable[..., T], *args, **kwargs):
         if callable(func) and func.__name__ == '<lambda>':
             raise self.LambdaNotAllowed(repr(func))
         self.func = func
         self.args = args
         self.kwargs = kwargs
 
-    def __call__(self):
+    def __call__(self) -> T:
         return self.func(*self.args, **self.kwargs)
 
     def __repr__(self):
@@ -27,7 +31,8 @@ class Closure:
     def __eq__(self, other):
         return hash(self) == hash(other)
 
-    class LambdaNotAllowed(Exception): pass
+    class LambdaNotAllowed(Exception):
+        pass
 
 
 def tally(num=1):
@@ -51,4 +56,3 @@ def synchronized(lock):
                 return f(*args, **kw)
         return newFunction
     return wrap
-

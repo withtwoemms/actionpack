@@ -1,23 +1,23 @@
-from actionpack import Action
-from actionpack.utils import tally
-
-from oslash import Left
-from oslash import Right
+from __future__ import annotations
 from string import Template
 from time import sleep
-from typing import Union
+
+from actionpack import Action
+from actionpack.action import Name
+from actionpack.action import Outcome
+from actionpack.utils import tally
 
 
-class RetryPolicy(Action):
-    def __init__(self, action: Action, max_retries: int, delay_between_attempts: int=0):
+class RetryPolicy(Action[Name, Outcome]):
+    def __init__(self, action: Action[Name, Outcome], max_retries: int, delay_between_attempts: int = 0):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
 
-    def instruction(self):
+    def instruction(self) -> Outcome:
         return self.enact(self.delay_between_attempts)
 
-    def validate(self):
+    def validate(self) -> RetryPolicy:
         try:
             if self.retries >= 0:
                 raise RetryPolicy.Expired(f'{str(self.action)} already attempted. Will not perform.')
@@ -26,16 +26,16 @@ class RetryPolicy(Action):
         finally:
             return self
 
-    def enact(self, with_delay: int=0, counter: int=0) -> Union[Left, Right]:
+    def enact(self, with_delay: int = 0, counter: int = 0) -> Outcome:
         result = self.action.perform()
         for _tally in tally(self.max_retries):
-            if isinstance(result, Right):
-                self.retries = counter
-                return result
-            else:
+            if isinstance(result.value, Exception):
                 counter += _tally
                 result = self.action.perform()
                 sleep(with_delay)
+            else:
+                self.retries = counter
+                return result.value
         self.retries = counter
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 
@@ -48,5 +48,5 @@ class RetryPolicy(Action):
             delay='' if not self.delay_between_attempts else f' | {self.delay_between_attempts}s delay'
         )
 
-    class Expired(Exception): pass
-
+    class Expired(Exception):
+        pass

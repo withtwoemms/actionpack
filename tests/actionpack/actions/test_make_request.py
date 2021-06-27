@@ -35,7 +35,11 @@ class MakeRequestTest(TestCase):
         self.assertIsInstance(second_result, Result)
         self.assertIsInstance(second_result.value, ValidationFailure)
 
-    def test_MakeRequest_has_portable_dependency(self):
+    @patch('requests.Session.send')
+    def test_MakeRequest_has_portable_dependency(self, mock_session_send):
+        mock_session_send.return_value = FakeResponse(status=500)
+
+        self.action.perform()
         self.assertIsInstance(self.action.requests, ModuleType)
 
     def test_can_pickle(self):

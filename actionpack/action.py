@@ -39,6 +39,7 @@ class Action(Generic[Name, Outcome]):
     _name: Optional[Name] = None
 
     lock = RLock()
+    requirements = tuple()
 
     def instruction(self):
         pass
@@ -66,6 +67,11 @@ class Action(Generic[Name, Outcome]):
     def name(self):
         del self._name
 
+    def check_dependencies(self, cls):
+        for requirement in cls.requirements:
+            if not hasattr(cls, requirement):
+                Action.DependencyCheck(cls, requirement)
+
     def _perform(self, should_raise: bool = False) -> Result[Outcome]:
         if not callable(self.instruction):
             outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
@@ -80,11 +86,8 @@ class Action(Generic[Name, Outcome]):
             return Result(outcome)
 
     def __init_subclass__(cls, requires=None):
-        cls.requires = requires
-        if cls.requires:
-            for requirement in requires:
-                Action.DependencyCheck(requirement)
-                setattr(cls, requirement, __import__(requirement))
+        if requires:
+            cls.requirements += requires
 
     def __getstate__(self):
         return vars(self)
@@ -106,13 +109,15 @@ class Action(Generic[Name, Outcome]):
         pass
 
     class DependencyCheck:
-        def __init__(self, requires: str = None):
-            if not requires:
-                raise self.WhichPackage('do you want to check? Please specify a requires=')
+        def __init__(self, cls, requirement: str = None):
+            if not requirement:
+                raise self.WhichPackage('do you want to check? Please specify a requirment kwarg.')
 
-            result = run([python, '-m', 'pip', 'show', requires], stdout=PIPE, stderr=PIPE)
+            result = run([python, '-m', 'pip', 'show', requirement], stdout=PIPE, stderr=PIPE)
             if result.returncode != 0:
-                raise self.PackageMissing(f'so please install "{requires}" to proceed.')
+                raise self.PackageMissing(f'so please install "{requirement}" to proceed.')
+
+            setattr(cls, requirement, __import__(requirement))
 
         class PackageMissing(Exception):
             pass

@@ -106,13 +106,13 @@ class Action(Generic[Name, Outcome]):
         pass
 
     class DependencyCheck:
-        def __init__(self, requires: str = None):
-            if not requires:
-                raise self.WhichPackage('do you want to check? Please specify a requires=')
+        def __init__(self, requirement: str = None):
+            if not requirement:
+                raise self.WhichPackage('do you want to check? Please specify a requirment kwarg.')
 
-            result = run([python, '-m', 'pip', 'show', requires], stdout=PIPE, stderr=PIPE)
+            result = run([python, '-m', 'pip', 'show', requirement], stdout=PIPE, stderr=PIPE)
             if result.returncode != 0:
-                raise self.PackageMissing(f'so please install "{requires}" to proceed.')
+                raise self.PackageMissing(f'so please install "{requirement}" to proceed.')
 
         class PackageMissing(Exception):
             pass

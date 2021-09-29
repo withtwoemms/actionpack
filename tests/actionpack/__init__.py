@@ -1,4 +1,5 @@
 from io import BytesIO
+from io import StringIO
 
 from actionpack import Action
 from actionpack.action import Name
@@ -25,7 +26,7 @@ class FakeAction(Action[Name, Outcome]):
 
 class FakeFile:
     def __init__(self, contents: bytes = bytes(), mode: str = None):
-        self.buffer = BytesIO(contents)
+        self.buffer = BytesIO(contents) if mode not in ['a', 'a+'] else StringIO(contents.decode())
         self.buffer.read()
         self.mode = mode
 

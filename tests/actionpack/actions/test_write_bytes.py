@@ -37,7 +37,7 @@ class WriteBytesTest(TestCase):
 
     @patch('pathlib.Path.open')
     def test_can_WriteBytes_in_append_mode(self, mock_output):
-        file = FakeFile(self.salutation)
+        file = FakeFile(self.salutation, mode='a')
         mock_output.return_value = file
         question = b' How are you?'
         action = WriteBytes('valid/path/to/file', question, append=True)
@@ -45,7 +45,7 @@ class WriteBytesTest(TestCase):
         action.perform()
 
         self.assertEqual(
-            f'{self.salutation.decode()}{question.decode()}{question.decode()}'.encode(),
+            f'{self.salutation.decode()}{question.decode()}\n{question.decode()}\n',
             file.read()
         )
 

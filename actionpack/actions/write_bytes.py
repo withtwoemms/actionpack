@@ -15,14 +15,16 @@ class WriteBytes(Action[Name, int]):
     def instruction(self) -> int:
         if self.append:
             appendable_path = self.path.open('a')
-            return appendable_path.write(self.bytes_to_write)
+            # NOTE: Byte decoding is fixed as UTF-8.
+            # In the future, a character encoding option should be provided to the user
+            return appendable_path.write(f'{self.bytes_to_write.decode("utf-8")}\n')
 
         return self.path.write_bytes(self.bytes_to_write)
 
     def validate(self) -> WriteBytes[Name, int]:
         if self.overwrite and self.append:
             raise ValueError('Cannot overwrite and append simultaneously')
-        if self.path.exists() and not self.overwrite:
+        if self.path.exists() and not self.overwrite and not self.append:
             raise FileExistsError(f'Cannot {str(self)} to {str(self.path)}')
         if self.path.is_dir():
             raise IsADirectoryError(str(self.path))

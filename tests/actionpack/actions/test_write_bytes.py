@@ -49,7 +49,6 @@ class WriteBytesTest(TestCase):
             file.read()
         )
 
-
     @patch('pathlib.Path.open')
     def test_cannot_overwrite_and_append(self, mock_output):
         file = FakeFile(self.salutation)

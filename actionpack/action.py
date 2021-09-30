@@ -21,12 +21,15 @@ ResultValue = Union[Outcome, Exception]
 
 
 class Result(Generic[Outcome]):
+
     def __init__(self, outcome: Either):
         self.value: Optional[ResultValue[Outcome]] = None
         if isinstance(outcome, Right):
             self.value = outcome.value
+            self.successful = True
         elif isinstance(outcome, Left):
             self.value = outcome.value
+            self.successful = False
         else:
             raise self.OutcomeMustBeOfTypeEither
 

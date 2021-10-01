@@ -38,6 +38,16 @@ class ActionTest(TestCase):
         self.assertTrue(success.successful)
         self.assertFalse(failure.successful)
 
+    def test_Result_success_is_immutable(self):
+        success = FakeAction().perform()
+        failure = FakeAction(exception=self.exception).perform()
+
+        with self.assertRaises(AttributeError):
+            success.successful = 'nah.'
+
+        with self.assertRaises(AttributeError):
+            failure.successful = 'maybe?'
+
     def test_Action_can_be_serialized(self):
         action = FakeAction()
         pickled = pickle.dumps(action)

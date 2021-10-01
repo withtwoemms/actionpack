@@ -22,16 +22,27 @@ ResultValue = Union[Outcome, Exception]
 
 class Result(Generic[Outcome]):
 
+    _immutables = ('successful',)
+
     def __init__(self, outcome: Either):
         self.value: Optional[ResultValue[Outcome]] = None
-        if isinstance(outcome, Right):
+        if type(outcome) in [Left, Right]:
             self.value = outcome.value
-            self.successful = True
-        elif isinstance(outcome, Left):
-            self.value = outcome.value
-            self.successful = False
+            self.successful = True if isinstance(outcome, Right) else False
         else:
             raise self.OutcomeMustBeOfTypeEither
+
+    def __setattr__(self, name, value):
+        if name in self._immutables and getattr(self, name, None) is not None:
+            raise AttributeError(f'Cannot modify `{name}`')
+        else:
+            return super(Result, self).__setattr__(name, value)
+
+    def __delattr__(self, name):
+        if name in self._immutables:
+            raise AttributeError(f'Cannot modify `{name}`')
+        else:
+            return super(Result, self).__delattr__(name)
 
     class OutcomeMustBeOfTypeEither(Exception):
         pass

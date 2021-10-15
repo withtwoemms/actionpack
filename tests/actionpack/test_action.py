@@ -14,21 +14,39 @@ from tests.actionpack.actions import FakeWriteBytes
 
 class ActionTest(TestCase):
 
+    def setUp(self) -> None:
+        self.exception = Exception('something went wrong :/')
+
     def test_Action_produces_Result_result_when_performed(self):
         result = FakeAction().perform()
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, FakeAction.result)
 
     def test_Action_produces_Result_if_exception_raised_when_performed(self):
-        exception = Exception('something went wrong :/')
-        result = FakeAction(exception=exception).perform()
+        result = FakeAction(exception=self.exception).perform()
         self.assertIsInstance(result, Result)
-        self.assertEqual(result.value, exception)
+        self.assertEqual(result.value, self.exception)
 
     def test_Action_can_raise_exception(self):
-        exception = Exception('This is fine :|')
-        with self.assertRaises(type(exception)):
-            FakeAction(exception=exception).perform(should_raise=True)
+        with self.assertRaises(type(self.exception)):
+            FakeAction(exception=self.exception).perform(should_raise=True)
+
+    def test_can_determine_if_Result_was_successful(self):
+        success = FakeAction().perform()
+        failure = FakeAction(exception=self.exception).perform()
+
+        self.assertTrue(success.successful)
+        self.assertFalse(failure.successful)
+
+    def test_Result_success_is_immutable(self):
+        success = FakeAction().perform()
+        failure = FakeAction(exception=self.exception).perform()
+
+        with self.assertRaises(AttributeError):
+            success.successful = 'nah.'
+
+        with self.assertRaises(AttributeError):
+            failure.successful = 'maybe?'
 
     def test_Action_can_be_serialized(self):
         action = FakeAction()

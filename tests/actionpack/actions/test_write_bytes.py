@@ -35,6 +35,29 @@ class WriteBytesTest(TestCase):
         self.assertEqual(file.read(), self.question)
         self.assertEqual(result.value, len(self.question))
 
+    @patch('pathlib.Path.open')
+    def test_can_WriteBytes_in_append_mode(self, mock_output):
+        file = FakeFile(self.salutation, mode='a')
+        mock_output.return_value = file
+        question = b' How are you?'
+        action = WriteBytes('valid/path/to/file', question, append=True)
+        action.perform()
+        action.perform()
+
+        self.assertEqual(
+            f'{self.salutation.decode()}{question.decode()}\n{question.decode()}\n',
+            file.read()
+        )
+
+    @patch('pathlib.Path.open')
+    def test_cannot_overwrite_and_append(self, mock_output):
+        file = FakeFile(self.salutation)
+        mock_output.return_value = file
+        action = WriteBytes('valid/path/to/file', b'bytes to write', overwrite=True, append=True)
+
+        with self.assertRaises(ValueError):
+            action.validate()
+
     def test_can_pickle(self):
         pickled = pickleable(self.action)
         unpickled = pickle.loads(pickled)

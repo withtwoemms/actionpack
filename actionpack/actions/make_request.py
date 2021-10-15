@@ -25,6 +25,7 @@ class MakeRequest(Action[Name, Outcome], requires=('requests',)):
         self.session = session
 
     def prepare(self, method: str, url: str, data: dict = None, headers=None) -> Request:
+        self.check_dependencies(self)
         return self.requests.Request(method, url, data=data, headers=headers).prepare()
 
     def instruction(self) -> Response:

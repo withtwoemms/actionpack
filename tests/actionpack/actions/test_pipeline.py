@@ -36,7 +36,7 @@ class PipelineTest(TestCase):
             ReadBytes,  # retrieve question from FakeFile
             ReadInput   # pose question to user
         ]
-        pipeline = Pipeline(read_input, *(action_type for action_type in action_types))
+        pipeline = Pipeline(read_input, *action_types)
         result = pipeline.perform(should_raise=True)
 
         self.assertEqual(file.read(), question + b'\n')

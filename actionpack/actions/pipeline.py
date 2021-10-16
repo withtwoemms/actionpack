@@ -9,14 +9,14 @@ from actionpack.actions import Call
 
 class Pipeline(Action):
 
-    def __init__(self, action: Action, *action_types: ActionType):
+    def __init__(self, action: Action, *action_types: ActionType, should_raise: bool = False):
         self.action = action
+        self.should_raise = should_raise
         self.action_types = action_types
         self._action_types = iter(self.action_types)
 
-    # TODO (withtwoemms) -- accept a `should_raise` param
     def instruction(self):
-        return self.flush(self.action).perform(should_raise=True).value
+        return self.flush(self.action).perform(should_raise=self.should_raise).value
 
     # recursive
     def flush(self, given_action: Optional[Action] = None) -> Action:
@@ -26,7 +26,7 @@ class Pipeline(Action):
             params_dict = OrderedDict(signature(next_action_type.__init__).parameters.items())
             params_dict.pop('self', None)
             params = list(params_dict.keys())
-            keyed_result = dict(zip(params, [given_action.perform(should_raise=True).value]))
+            keyed_result = dict(zip(params, [given_action.perform(should_raise=self.should_raise).value]))
             if isinstance(next_action_type, Fitting):
                 params_dict = OrderedDict(signature(next_action_type.action.__init__).parameters.items())
                 params_dict.pop('self', None)
@@ -97,16 +97,22 @@ class FittingType(type):
 
 class Fitting(Action):
 
-    def __init__(self, action: Action, reaction: Call = None, *args, **kwargs):
+    def __init__(
+        self,
+        action: Action,
+        should_raise: bool = False,
+        reaction: Call = None,
+        *args, **kwargs
+    ):
         self.action = action
+        self.should_raise = should_raise
         self.args = args
         self.kwargs = kwargs
         self.signature = signature(action.__init__)
         self.reaction = reaction
 
-    # TODO (withtwoemms) -- accept a `should_raise` param
     def instruction(self):
-        action_performance = self.action.perform(should_raise=True)
+        action_performance = self.action.perform(should_raise=self.should_raise)
         if action_performance.successful and self.reaction:
-            return self.reaction.perform(should_raise=True)
+            return self.reaction.perform(should_raise=self.should_raise)
         return action_performance

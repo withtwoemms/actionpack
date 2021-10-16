@@ -14,6 +14,7 @@ class Serialization(Action[Name, str]):
             raise self.NoDataGiven()
         if not self.schema:
             raise self.NoSchemaGiven()
+        return self
 
     def instruction(self) -> str:
         return self.schema.loads(self.data) if self.inverse else self.schema.dumps(self.data)

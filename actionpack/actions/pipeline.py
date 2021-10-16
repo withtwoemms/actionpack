@@ -1,24 +1,20 @@
 from collections import OrderedDict
-from inspect import BoundArguments
 from inspect import signature
-from oslash import Right
-from typing import Dict
 from typing import Optional
 
-from actionpack.utils import first
-from actionpack.procedure import KeyedProcedure
 from actionpack import Action
-from actionpack.action import ActionType, Result
+from actionpack.action import ActionType
+from actionpack.actions import Call
 
 
 class Pipeline(Action):
 
     def __init__(self, action: Action, *action_types: ActionType):
-        # self.first_result = action.perform()
         self.action = action
         self.action_types = action_types
         self._action_types = iter(self.action_types)
 
+    # TODO (withtwoemms) -- accept a `should_raise` param
     def instruction(self):
         return self.flush(self.action).perform(should_raise=True).value
 
@@ -40,9 +36,9 @@ class Pipeline(Action):
                 next_action = next_action_type.action(*next_action_type.args, **next_action_type.kwargs)
             else:
                 next_action = next_action_type(**keyed_result)
-                
+
             return self.flush(next_action)
-        
+
         return given_action
 
     def __iter__(self):
@@ -101,11 +97,16 @@ class FittingType(type):
 
 class Fitting(Action):
 
-    def __init__(self, action: Action, *args, **kwargs):
+    def __init__(self, action: Action, reaction: Call = None, *args, **kwargs):
         self.action = action
         self.args = args
         self.kwargs = kwargs
         self.signature = signature(action.__init__)
+        self.reaction = reaction
 
+    # TODO (withtwoemms) -- accept a `should_raise` param
     def instruction(self):
-        return self.action.perform()
+        action_performance = self.action.perform(should_raise=True)
+        if action_performance.successful and self.reaction:
+            return self.reaction.perform(should_raise=True)
+        return action_performance

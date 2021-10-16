@@ -14,10 +14,7 @@ class WriteBytes(Action[Name, int]):
 
     def instruction(self) -> int:
         if self.append:
-            appendable_path = self.path.open('a')
-            # NOTE: Byte decoding is fixed as UTF-8.
-            # In the future, a character encoding option should be provided to the user
-            return appendable_path.write(f'{self.bytes_to_write.decode("utf-8")}\n')
+            return self.path.open('ab').write(self.bytes_to_write + b'\n')
 
         return self.path.write_bytes(self.bytes_to_write)
 

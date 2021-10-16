@@ -45,7 +45,7 @@ class WriteBytesTest(TestCase):
         action.perform()
 
         self.assertEqual(
-            f'{self.salutation.decode()}{question.decode()}\n{question.decode()}\n',
+            self.salutation + question + b'\n' + question + b'\n',
             file.read()
         )
 

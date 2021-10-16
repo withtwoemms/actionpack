@@ -1,12 +1,14 @@
-from actionpack.utils import first
-from actionpack.procedure import KeyedProcedure
-from actionpack import Action
-from actionpack.action import ActionType, Result
-
+from collections import OrderedDict
 from inspect import BoundArguments
 from inspect import signature
 from oslash import Right
 from typing import Dict
+from typing import Optional
+
+from actionpack.utils import first
+from actionpack.procedure import KeyedProcedure
+from actionpack import Action
+from actionpack.action import ActionType, Result
 
 
 class Pipeline(Action):
@@ -18,46 +20,30 @@ class Pipeline(Action):
         self._action_types = iter(self.action_types)
 
     def instruction(self):
-        # return self.flush()
-        return self.flush(self.action)
+        return self.flush(self.action).perform(should_raise=True).value
 
     # recursive
-    def flush(self, given_action: Action = None):
+    def flush(self, given_action: Optional[Action] = None) -> Action:
         next_action_type = next(self)
+
         if next_action_type:
-            print('>>>', next_action_type)
-            # if next_action_type == FittingType:
-            #     print('SUP!')
-            if next_action_type.__name__ == 'Fitting':
-                next_action_type_params = next_action_type.keywords
-                print('PARAMS ->>', next_action_type_params)
+            params_dict = OrderedDict(signature(next_action_type.__init__).parameters.items())
+            params_dict.pop('self', None)
+            params = list(params_dict.keys())
+            keyed_result = dict(zip(params, [given_action.perform(should_raise=True).value]))
+            if isinstance(next_action_type, Fitting):
+                params_dict = OrderedDict(signature(next_action_type.action.__init__).parameters.items())
+                params_dict.pop('self', None)
+                params = list(params_dict.keys())
+                keyed_result = dict(zip(params, [keyed_result['action']]))
+                next_action_type.kwargs.update(keyed_result)
+                next_action = next_action_type.action(*next_action_type.args, **next_action_type.kwargs)
             else:
-                next_action_type_params = dict(signature(next_action_type.__init__).parameters.items())
-                print('PARAMS ->', next_action_type_params)
-            next_action_type_params.pop('self', None)
-            next_action_type_params_keys = list(next_action_type_params.keys())
-            first_key = next_action_type_params_keys[0] 
-            # first_key = next_action_type_params_keys.pop(0)  # first is fine for now...
-            if given_action.__class__.__name__ == 'Fitting':
-                # kprs = {}
-                kprs = given_action.keywords
-            else:
-                kprs = dict(KeyedProcedure(*(given_action.set(name=first_key),)).execute())
-            print('PARAM_KEYS ->', next_action_type_params_keys)
-            print('KPRS ->', kprs)
-            # kprs.update({k: None for k in next_action_type_params_keys if k not in next_action_type_params})  # should allow control of None
-            kprs.update({k: None for k in next_action_type_params_keys if k not in kprs})  # should allow control of None
-            # kprs.update({k: None for k in next_action_type_params_keys if kprs.get(k, None) is None})  # should allow control of None
-            print('KPRS *->', kprs)
-            if given_action.__class__.__name__ == 'Fitting':
-                keyed_result = kprs
-            else:
-                keyed_result = {k: r.value for k, r in kprs.items()}
-            print('KEYED_RESULT ->', keyed_result)
-            next_action = next_action_type(**keyed_result)
-            # next_action = next_action_type(**kprs)
-            print('<<<', next_action)
+                next_action = next_action_type(**keyed_result)
+                
             return self.flush(next_action)
+        
+        return given_action
 
     def __iter__(self):
         return self._action_types
@@ -116,9 +102,10 @@ class FittingType(type):
 class Fitting(Action):
 
     def __init__(self, action: Action, *args, **kwargs):
-        self.signature = signature(action)
+        self.action = action
         self.args = args
         self.kwargs = kwargs
+        self.signature = signature(action.__init__)
 
     def instruction(self):
-        return self.signature.bind(*self.args, **self.kwargs)
+        return self.action.perform()

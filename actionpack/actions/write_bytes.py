@@ -14,9 +14,10 @@ class WriteBytes(Action[Name, int]):
 
     def instruction(self) -> int:
         if self.append:
-            return self.path.open('ab').write(self.bytes_to_write + b'\n')
-
-        return self.path.write_bytes(self.bytes_to_write)
+            self.path.open('ab').write(self.bytes_to_write + b'\n')
+        else:
+            self.path.write_bytes(self.bytes_to_write)
+        return str(self.path.absolute())
 
     def validate(self) -> WriteBytes[Name, int]:
         if self.overwrite and self.append:

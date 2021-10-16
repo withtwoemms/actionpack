@@ -1,5 +1,6 @@
 import pickle
 
+from os import getcwd as cwd
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -14,7 +15,8 @@ class WriteBytesTest(TestCase):
     def setUp(self):
         self.salutation = 'Hello.'.encode()
         self.question = ' How are you?'.encode()
-        self.action = WriteBytes('valid/path/to/file', self.question)
+        self.absfilepath = f'{cwd()}/valid/path/to/file'
+        self.action = WriteBytes(self.absfilepath, self.question)
 
     @patch('pathlib.Path.open')
     def test_can_WriteBytes(self, mock_output):
@@ -24,7 +26,7 @@ class WriteBytesTest(TestCase):
 
         self.assertEqual(file.read(), self.salutation + self.question)
         self.assertIsInstance(result, Result)
-        self.assertEqual(result.value, len(self.question))
+        self.assertEqual(result.value, self.absfilepath)
 
     @patch('pathlib.Path.open')
     def test_can_overWriteBytes(self, mock_output):
@@ -33,14 +35,14 @@ class WriteBytesTest(TestCase):
         result = self.action.perform()
 
         self.assertEqual(file.read(), self.question)
-        self.assertEqual(result.value, len(self.question))
+        self.assertEqual(result.value, self.absfilepath)
 
     @patch('pathlib.Path.open')
     def test_can_WriteBytes_in_append_mode(self, mock_output):
         file = FakeFile(self.salutation, mode='a')
         mock_output.return_value = file
         question = b' How are you?'
-        action = WriteBytes('valid/path/to/file', question, append=True)
+        action = WriteBytes(self.absfilepath, question, append=True)
         action.perform()
         action.perform()
 
@@ -53,7 +55,7 @@ class WriteBytesTest(TestCase):
     def test_cannot_overwrite_and_append(self, mock_output):
         file = FakeFile(self.salutation)
         mock_output.return_value = file
-        action = WriteBytes('valid/path/to/file', b'bytes to write', overwrite=True, append=True)
+        action = WriteBytes(self.absfilepath, b'bytes to write', overwrite=True, append=True)
 
         with self.assertRaises(ValueError):
             action.validate()

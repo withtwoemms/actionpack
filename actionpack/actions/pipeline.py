@@ -12,6 +12,11 @@ class Pipeline(Action):
     def __init__(self, action: Action, *action_types: ActionType, should_raise: bool = False):
         self.action = action
         self.should_raise = should_raise
+
+        for action_type in action_types:
+            if not isinstance(action_type, ActionType):
+                raise TypeError(f'Must be an {ActionType.__name__}: {action_type}')
+
         self.action_types = action_types
         self._action_types = iter(self.action_types)
 
@@ -27,13 +32,13 @@ class Pipeline(Action):
             params_dict.pop('self', None)
             params = list(params_dict.keys())
             keyed_result = dict(zip(params, [given_action.perform(should_raise=self.should_raise).value]))
-            if isinstance(next_action_type, Fitting):
+            if next_action_type.__name__ == Pipeline.Fitting.__name__:
                 params_dict = OrderedDict(signature(next_action_type.action.__init__).parameters.items())
                 params_dict.pop('self', None)
                 params = list(params_dict.keys())
                 keyed_result = dict(zip(params, [keyed_result['action']]))
                 next_action_type.kwargs.update(keyed_result)
-                next_action = next_action_type.action(*next_action_type.args, **next_action_type.kwargs)
+                next_action = next_action_type.action(**next_action_type.kwargs)
             else:
                 next_action = next_action_type(**keyed_result)
 
@@ -50,69 +55,37 @@ class Pipeline(Action):
         except StopIteration:
             self._action_types = iter(self._action_types)
 
+    class Fitting(type):
 
-class FittingType(type):
+        @staticmethod
+        def init(
+            action: Action,
+            should_raise: bool = False,
+            reaction: Call = None,
+            *args, **kwargs
+        ):
+            pass
 
-    @staticmethod
-    def init(instance, **kwargs):
-        print('INSTANCE', instance)
-        print('KWARGS', kwargs)
-        setattr(instance, 'keywords', kwargs)
-        # setattr(instance, 'kwargs', kwargs)
+        @staticmethod
+        def instruction(instance):
+            action_performance = instance.action.perform(should_raise=instance.should_raise)
+            if action_performance.successful and instance.reaction:
+                return instance.reaction.perform(should_raise=instance.should_raise)
+            return action_performance
 
-    # @staticmethod
-    # def init(instance, *args):
-    #     print('INSTANCE', instance)
-    #     print('ARGS', args)
-    #     setattr(instance, 'args', args)
-    #     #for i, arg in enumerate(args):
-    #     #    setattr(instance, f'arg{i}', arg)
-
-    @staticmethod
-    def instruction(instance):
-        # return dict(zip(instance.keywords, instance.args))
-        instance.keyed_values
-
-    # def __new__(mcs, keyed_results: Dict[str, Result]):
-    #     dct = {
-    #         '__init__': FittingType.init,
-    #         'instruction': FittingType.instruction,
-    #         'keyed_values': {k: r.value for k, r in keyed_results.items()}
-    #     }
-    #     cls = type('Fitting', (Action,), dct)
-
-    #     return cls
-
-    # def __new__(mcs, dct: dict = None, keywords: set = None):
-    def __new__(mcs, dct: dict = None, keywords: dict = None):
-        dct = dct if isinstance(dct, dict) else dict()
-        dct['__init__'] = FittingType.init
-        dct['instruction'] = FittingType.instruction
-        # keywords = keywords if isinstance(keywords, set) else set()
-        keywords = keywords if isinstance(keywords, dict) else dict()
-        dct['keywords'] = keywords
-        cls = type('Fitting', (Action,), dct)
-        return cls
-
-
-class Fitting(Action):
-
-    def __init__(
-        self,
-        action: Action,
-        should_raise: bool = False,
-        reaction: Call = None,
-        *args, **kwargs
-    ):
-        self.action = action
-        self.should_raise = should_raise
-        self.args = args
-        self.kwargs = kwargs
-        self.signature = signature(action.__init__)
-        self.reaction = reaction
-
-    def instruction(self):
-        action_performance = self.action.perform(should_raise=self.should_raise)
-        if action_performance.successful and self.reaction:
-            return self.reaction.perform(should_raise=self.should_raise)
-        return action_performance
+        def __new__(
+            mcs,
+            action: Action,
+            should_raise: bool = False,
+            reaction: Call = None,
+            **kwargs
+        ):
+            dct = dict()
+            dct['__init__'] = Pipeline.Fitting.init
+            dct['instruction'] = Pipeline.Fitting.instruction
+            dct['action'] = action
+            dct['should_raise'] = should_raise
+            dct['reaction'] = reaction
+            dct['kwargs'] = kwargs
+            cls = type(Pipeline.Fitting.__name__, (Action,), dct)
+            return cls

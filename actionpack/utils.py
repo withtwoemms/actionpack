@@ -1,7 +1,7 @@
 import pickle
 
 from functools import wraps
-from typing import Callable
+from typing import Callable, Iterable
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
@@ -56,3 +56,11 @@ def synchronized(lock):
                 return f(*args, **kw)
         return newFunction
     return wrap
+
+
+def first(iterable: Iterable):
+    return iterable[0]
+
+
+def last(iterable: Iterable):
+    return iterable[-1]

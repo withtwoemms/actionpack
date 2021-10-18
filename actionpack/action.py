@@ -48,7 +48,11 @@ class Result(Generic[Outcome]):
         pass
 
 
-class Action(Generic[Name, Outcome]):
+class ActionType(type):
+    pass
+
+
+class Action(Generic[Name, Outcome], metaclass=ActionType):
 
     _name: Optional[Name] = None
 

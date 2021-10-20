@@ -8,6 +8,7 @@ from actionpack.actions import ReadBytes
 from actionpack.actions import WriteBytes
 from actionpack.actions.pipeline import Call
 from actionpack.utils import Closure
+from actionpack.utils import key_for
 from tests.actionpack import FakeFile
 
 
@@ -34,7 +35,7 @@ class PipelineTest(TestCase):
     @patch('pathlib.Path.open')
     @patch('pathlib.Path.exists')
     @patch('builtins.input')
-    def test_Pipeline_FittingType(self, mock_input, mock_exists, mock_file):
+    def test_Pipeline_Fitting(self, mock_input, mock_exists, mock_file):
         filename = 'this/file.txt'
         file = FakeFile()
         question = b'How are you?'
@@ -60,3 +61,31 @@ class PipelineTest(TestCase):
         self.assertEqual(file.read(), question + b'\n')
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, reply)
+
+    @patch('pathlib.Path.open')
+    @patch('pathlib.Path.exists')
+    @patch('builtins.input')
+    def test_Pipeline_Receiver(self, mock_input, mock_exists, mock_file):
+        filename = 'this/file.txt'
+        file = FakeFile()
+        reply = b"I'd like to record this."
+
+        mock_file.return_value = file
+        mock_exists.return_value = True
+        mock_input.return_value = reply
+
+        read_input = ReadInput('What would you like to record?')
+        action_types = [
+            Pipeline.Fitting(
+                action=WriteBytes,
+                reaction=Call(Closure(bytes.decode)),
+                **{'append': True, 'filename': filename, 'bytes_to_write': Pipeline.Receiver},
+            )
+        ]
+        pipeline = Pipeline(read_input, *action_types, should_raise=True)
+        result = pipeline.perform(should_raise=True)
+
+        self.assertEqual(file.read(), reply + b'\n')
+        self.assertIsInstance(result, Result)
+        print(result.value)
+        # self.assertEqual(result.value, reply)

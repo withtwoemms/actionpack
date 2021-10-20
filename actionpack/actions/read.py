@@ -6,7 +6,7 @@ from actionpack.action import Name
 
 
 class Read(Action[Name, bytes]):
-    def __init__(self, filename: str, output_type: type = bytes):
+    def __init__(self, filename: str, output_type: type = str):
         if output_type not in [bytes, str]:
             raise TypeError(f'Must be of type bytes or str: {output_type}')
         self.output_type = output_type

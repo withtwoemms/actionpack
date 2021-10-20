@@ -1,8 +1,11 @@
 import pickle
 
 from functools import wraps
-from typing import Callable, Iterable
+from typing import Callable
+from typing import Dict
 from typing import Generic
+from typing import Iterable
+from typing import List
 from typing import Optional
 from typing import TypeVar
 
@@ -64,3 +67,15 @@ def first(iterable: Iterable):
 
 def last(iterable: Iterable):
     return iterable[-1]
+
+
+def key_for(value: T, dct: Dict) -> Optional[T]:
+    try:
+        return list(dct.keys())[list(dct.values()).index(value)]
+    except ValueError:
+        return None
+
+
+def swap(lst: List, idx1: int, idx2: int) -> List:
+    lst[idx1], lst[idx2] = lst[idx2], lst[idx1]
+    return lst

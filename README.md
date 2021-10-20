@@ -31,7 +31,7 @@ An `Action` collection can be used to describe a procedure:
 ...            RetryPolicy(MakeRequest('GET', 'http://bad-connectivity.com'),
 ...                        max_retries=2,
 ...                        delay_between_attempts=2)
-...            WriteBytes('path/to/yet/another/file', b'sup')]
+...            Write('path/to/yet/another/file', 'sup')]
 ...
 >>> procedure = Procedure(*actions)
 ```
@@ -51,7 +51,7 @@ The `Action` names are used as keys for convenient result lookup.
 ```python
 >>> prompt = '>>> sure, I'll save it for ya.. <<<\n  > '
 >>> saveme = ReadInput(prompt).set(name='saveme')
->>> writeme = WriteBytes('path/to/yet/another/file', b'sup').set(name='writeme')
+>>> writeme = Write('path/to/yet/another/file', 'sup').set(name='writeme')
 >>> actions = [saveme, writeme]
 >>> keyed_procedure = KeyedProcedure(*actions)
 >>> results = keyed_procedure.execute()

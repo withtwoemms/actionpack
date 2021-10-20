@@ -5,7 +5,7 @@ from actionpack.action import Result
 from actionpack.actions import Pipeline
 from actionpack.actions import ReadInput
 from actionpack.actions import ReadBytes
-from actionpack.actions import WriteBytes
+from actionpack.actions import Write
 from actionpack.actions.pipeline import Call
 from actionpack.utils import Closure
 from tests.actionpack import FakeFile
@@ -47,9 +47,9 @@ class PipelineTest(TestCase):
         read_input = ReadInput('Which file?')
         action_types = [
             Pipeline.Fitting(
-                action=WriteBytes,
+                action=Write,
                 reaction=Call(Closure(bytes.decode)),
-                **{'append': True, 'bytes_to_write': question},
+                **{'append': True, 'to_write': question},
             ),
             ReadBytes,  # retrieve question from FakeFile
             ReadInput   # pose question to user

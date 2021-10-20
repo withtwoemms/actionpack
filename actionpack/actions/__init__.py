@@ -5,7 +5,7 @@ from actionpack.actions.read_bytes import ReadBytes
 from actionpack.actions.read_input import ReadInput
 from actionpack.actions.retry_policy import RetryPolicy
 from actionpack.actions.serialization import Serialization
-from actionpack.actions.write_bytes import WriteBytes
+from actionpack.actions.write import Write
 
 
 __all__ = [
@@ -16,5 +16,5 @@ __all__ = [
     'ReadInput',
     'RetryPolicy',
     'Serialization',
-    'WriteBytes'
+    'Write',
 ]

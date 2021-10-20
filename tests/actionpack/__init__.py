@@ -1,5 +1,6 @@
 from io import BytesIO
 from io import StringIO
+from typing import Union
 
 from actionpack import Action
 from actionpack.action import Name
@@ -25,8 +26,10 @@ class FakeAction(Action[Name, Outcome]):
 
 
 class FakeFile:
-    def __init__(self, contents: bytes = bytes(), mode: str = None):
-        self.buffer = BytesIO(contents)
+    def __init__(self, contents=None, mode: str = None):
+        if not contents:
+            contents = bytes()
+        self.buffer = BytesIO(contents) if isinstance(contents, bytes) else StringIO(contents)
         self.buffer.read()
         self.mode = mode
 
@@ -34,8 +37,8 @@ class FakeFile:
         self.buffer.seek(0)
         return self.buffer.read()
 
-    def write(self, data: bytes):
-        if self.mode == 'wb':
+    def write(self, data):
+        if self.mode in ['wb', 'w']:
             self.buffer.seek(0)
             self.buffer.truncate()
         self.buffer.write(data)

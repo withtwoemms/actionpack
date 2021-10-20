@@ -15,11 +15,49 @@ Keeping track of external system state is just impractical, but declaring intent
 
 # Usage
 
-Intent can be declared using `Action` objects:
+### _What are Actions for?_
+
+`Action` objects are used to declare intent:
 
 ```python
 >>> action = Read('path/to/some/file')
 ```
+
+### _Can Actions be connected?_
+
+A `Result` can be produced by performing an `Action` and that value can be percolated through a collection of `ActionTypes` using the `Pipeline` abstraction:
+
+```python
+>>> pipeline = Pipeline(ReadInput('Which file? '), Read)
+```
+
+The above, is not the most helpful incantation, but toss the following in a `while` loop and witness some REPL-like behavior (bonus points for feeding it _actual_ filenames/filepaths).
+
+```python
+result = Pipeline(ReadInput('Which file? '), Read).perform()
+print(result.value)
+```
+
+Sometimes `ActionType`s in a `Pipeline` don't "fit" together.
+That's where the `Pipeline.Fitting` comes in:
+
+```python
+>>> listen = ReadInput('What should I record? ')
+>>> record = Pipeline.Fitting(
+...     action=Write,
+...     **{
+...         'prefix': f'[{datetime.now()}] ',
+...         'append': True,
+...         'filename': filename,
+...         'to_write': Pipeline.Receiver
+...     },
+... )
+>>> Pipeline(listen, record).perform()
+```
+
+> ⚠️ **_NOTE:_**  Writing to stdout is also possible using the `Write.STDOUT` object as a filename. How that works is an exercise left for the user.
+
+### _Handling multiple Actions at a time_
 
 An `Action` collection can be used to describe a procedure:
 
@@ -59,6 +97,10 @@ The `Action` names are used as keys for convenient result lookup.
 >>> first, second = keyed_results.get('saveme'), keyed_results.get('writeme')
 ```
 
+> ⚠️ **_NOTE:_**  `Procedure` elements are evaluated _independently_ unlike with a `Pipeline` in which the result of performing an `Action` is passed to the next `ActionType`.
+
+### _For the honeybadgers_
+
 One can also create an `Action` from some arbitrary function
 
 ```python
@@ -96,4 +138,3 @@ This will check if the dependencies are installed and, if so, will register each
 mr = MakeRequest('GET', 'http://localhost')
 mr.requests  #=> <module 'requests' from '~/actionpack/actionpack-venv/lib/python3/site-packages/requests/__init__.py'>
 ```
-

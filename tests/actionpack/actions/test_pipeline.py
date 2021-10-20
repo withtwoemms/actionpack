@@ -1,3 +1,4 @@
+from os import getcwd as cwd
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -8,7 +9,6 @@ from actionpack.actions import Read
 from actionpack.actions import Write
 from actionpack.actions.pipeline import Call
 from actionpack.utils import Closure
-from actionpack.utils import key_for
 from tests.actionpack import FakeFile
 
 
@@ -77,9 +77,9 @@ class PipelineTest(TestCase):
         read_input = ReadInput('What would you like to record?')
         action_types = [
             Pipeline.Fitting(
-                action=WriteBytes,
+                action=Write,
                 reaction=Call(Closure(bytes.decode)),
-                **{'append': True, 'filename': filename, 'bytes_to_write': Pipeline.Receiver},
+                **{'append': True, 'filename': filename, 'to_write': Pipeline.Receiver},
             )
         ]
         pipeline = Pipeline(read_input, *action_types, should_raise=True)
@@ -87,5 +87,4 @@ class PipelineTest(TestCase):
 
         self.assertEqual(file.read(), reply + b'\n')
         self.assertIsInstance(result, Result)
-        print(result.value)
-        # self.assertEqual(result.value, reply)
+        self.assertEqual(result.value, f'{cwd()}/{filename}')

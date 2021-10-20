@@ -5,6 +5,9 @@ from typing import Optional
 from actionpack import Action
 from actionpack.action import ActionType
 from actionpack.actions import Call
+from actionpack.utils import first
+from actionpack.utils import key_for
+from actionpack.utils import swap
 
 
 class Pipeline(Action):
@@ -36,6 +39,12 @@ class Pipeline(Action):
                 params_dict = OrderedDict(signature(next_action_type.action.__init__).parameters.items())
                 params_dict.pop('self', None)
                 params = list(params_dict.keys())
+                conduit = first(params)
+                if conduit in next_action_type.kwargs and key_for(Pipeline.Receiver, next_action_type.kwargs):
+                    params = swap(
+                        params, 0,
+                        params.index(key_for(Pipeline.Receiver, next_action_type.kwargs))
+                    )
                 keyed_result = dict(zip(params, [keyed_result['action']]))
                 next_action_type.kwargs.update(keyed_result)
                 next_action = next_action_type.action(**next_action_type.kwargs)
@@ -54,6 +63,9 @@ class Pipeline(Action):
             return next(self._action_types)
         except StopIteration:
             self._action_types = iter(self._action_types)
+
+    class Receiver:
+        pass
 
     class Fitting(type):
 

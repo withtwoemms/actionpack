@@ -9,7 +9,7 @@ from actionpack.action import Result
 from actionpack.utils import pickleable
 from tests.actionpack import FakeAction
 from tests.actionpack import FakeFile
-from tests.actionpack.actions import FakeWriteBytes
+from tests.actionpack.actions import FakeWrite
 
 
 class ActionTest(TestCase):
@@ -65,8 +65,8 @@ class ActionTest(TestCase):
             results.append(file.read())
 
         initial_file_contents = file.read()
-        action1 = FakeWriteBytes(file, b' How are you?', delay=0.2)
-        action2 = FakeWriteBytes(file, b' I hope you\'re well.', delay=0.1)
+        action1 = FakeWrite(file, b' How are you?', delay=0.2)
+        action2 = FakeWrite(file, b' I hope you\'re well.', delay=0.1)
         results = [initial_file_contents]
         thread1 = Thread(target=perform_and_collect, args=(action1, results))
         thread2 = Thread(target=perform_and_collect, args=(action2, results))
@@ -76,7 +76,7 @@ class ActionTest(TestCase):
 
         self.assertEqual(
             reduce(lambda a, b: a + b, results),
-            initial_file_contents + action1.bytes_to_write + action2.bytes_to_write
+            initial_file_contents + action1.to_write + action2.to_write
         )
 
     def test_Action_can_be_renamed(self):

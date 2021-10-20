@@ -6,7 +6,7 @@ from actionpack import Procedure
 from actionpack.action import Result
 from tests.actionpack import FakeAction
 from tests.actionpack import FakeFile
-from tests.actionpack.actions import FakeWriteBytes
+from tests.actionpack.actions import FakeWrite
 
 
 success = FakeAction(name='success')
@@ -49,15 +49,15 @@ class ProcedureTest(TestCase):
             Procedure('wut.', failure).validate()
 
     def test_can_execute_Procedure_asynchronously(self):
-        file = FakeFile(mode='w')
+        file = FakeFile()
 
         question = b' How are you?'
         wellwish = b' I hope you\'re well.'
 
-        action1 = FakeWriteBytes[str, int](file, question, delay=0.2)
-        action2 = FakeWriteBytes[str, int](file, wellwish, delay=0.1)
+        action1 = FakeWrite[str, int](file, question, delay=0.2)
+        action2 = FakeWrite[str, int](file, wellwish, delay=0.1)
 
-        procedure = Procedure[str, int](*[action1, action2])
+        procedure = Procedure[str, int](action1, action2)
         results = procedure.execute(should_raise=True, synchronously=False)
 
         assertIsIterable(results)

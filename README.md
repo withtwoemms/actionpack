@@ -18,14 +18,14 @@ Keeping track of external system state is just impractical, but declaring intent
 Intent can be declared using `Action` objects:
 
 ```python
->>> action = ReadBytes('path/to/some/file')
+>>> action = Read('path/to/some/file')
 ```
 
 An `Action` collection can be used to describe a procedure:
 
 ```python
 >>> actions = [action,
-...            ReadBytes('path/to/some/other/file'),
+...            Read('path/to/some/other/file'),
 ...            ReadInput('>>> how goes? <<<\n  > '),
 ...            MakeRequest('GET', 'http://google.com'),
 ...            RetryPolicy(MakeRequest('GET', 'http://bad-connectivity.com'),

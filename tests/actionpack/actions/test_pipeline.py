@@ -4,7 +4,7 @@ from unittest.mock import patch
 from actionpack.action import Result
 from actionpack.actions import Pipeline
 from actionpack.actions import ReadInput
-from actionpack.actions import ReadBytes
+from actionpack.actions import Read
 from actionpack.actions import Write
 from actionpack.actions.pipeline import Call
 from actionpack.utils import Closure
@@ -25,7 +25,7 @@ class PipelineTest(TestCase):
         mock_exists.return_value = True
         mock_input.return_value = filename
 
-        pipeline = Pipeline(ReadInput('Which file?'), ReadBytes)
+        pipeline = Pipeline(ReadInput('Which file?'), Read)
         result = pipeline.perform()
 
         self.assertIsInstance(result, Result)
@@ -51,7 +51,7 @@ class PipelineTest(TestCase):
                 reaction=Call(Closure(bytes.decode)),
                 **{'append': True, 'to_write': question},
             ),
-            ReadBytes,  # retrieve question from FakeFile
+            Read,  # retrieve question from FakeFile
             ReadInput   # pose question to user
         ]
         pipeline = Pipeline(read_input, *action_types, should_raise=True)

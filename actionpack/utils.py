@@ -54,10 +54,10 @@ def pickleable(obj) -> Optional[bytes]:
 def synchronized(lock):
     def wrap(f):
         @wraps(f)
-        def newFunction(*args, **kw):
+        def lockedFunction(*args, **kw):
             with lock:
                 return f(*args, **kw)
-        return newFunction
+        return lockedFunction
     return wrap
 
 

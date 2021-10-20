@@ -18,20 +18,20 @@ Keeping track of external system state is just impractical, but declaring intent
 Intent can be declared using `Action` objects:
 
 ```python
->>> action = ReadBytes('path/to/some/file')
+>>> action = Read('path/to/some/file')
 ```
 
 An `Action` collection can be used to describe a procedure:
 
 ```python
 >>> actions = [action,
-...            ReadBytes('path/to/some/other/file'),
+...            Read('path/to/some/other/file'),
 ...            ReadInput('>>> how goes? <<<\n  > '),
 ...            MakeRequest('GET', 'http://google.com'),
 ...            RetryPolicy(MakeRequest('GET', 'http://bad-connectivity.com'),
 ...                        max_retries=2,
 ...                        delay_between_attempts=2)
-...            WriteBytes('path/to/yet/another/file', b'sup')]
+...            Write('path/to/yet/another/file', 'sup')]
 ...
 >>> procedure = Procedure(*actions)
 ```
@@ -51,7 +51,7 @@ The `Action` names are used as keys for convenient result lookup.
 ```python
 >>> prompt = '>>> sure, I'll save it for ya.. <<<\n  > '
 >>> saveme = ReadInput(prompt).set(name='saveme')
->>> writeme = WriteBytes('path/to/yet/another/file', b'sup').set(name='writeme')
+>>> writeme = Write('path/to/yet/another/file', 'sup').set(name='writeme')
 >>> actions = [saveme, writeme]
 >>> keyed_procedure = KeyedProcedure(*actions)
 >>> results = keyed_procedure.execute()

@@ -40,6 +40,17 @@ class SerializationTest(TestCase):
         self.assertIsInstance(result.value, str)
         self.assertTrue(json.loads(result.value))
 
+    def test_can_marshmallow_serialization_given_exception(self):
+        exception_msg = 'should fail.'
+        exception = Exception(exception_msg)
+        serialization = Serialization(self.UserSchema(), exception)
+        result = serialization.perform()
+
+        self.assertIsInstance(result, Result)
+        self.assertFalse(result.successful)
+        self.assertIsInstance(result.value, type(exception))
+        self.assertEqual(str(result.value), exception_msg)
+
     def test_can_deserialize_marshmallow(self):
         deserialization = Serialization(self.UserSchema(), json.dumps(self.user_dict), inverse=True)
         result = deserialization.perform()

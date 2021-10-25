@@ -1,6 +1,7 @@
 from __future__ import annotations
 from os import sys
 from pathlib import Path
+from typing import Optional
 
 from actionpack import Action
 from actionpack.action import Name
@@ -11,13 +12,26 @@ class Write(Action[Name, int]):
         self,
         filename: str,
         to_write: str,
-        prefix: str = None,
+        prefix: Optional[str] = None,
         overwrite: bool = False,
         append: bool = False,
     ):
+        acceptable_prefix_types = [bytes, str]
         prefix_type, to_write_type = type(prefix), type(to_write)
-        if prefix_type != to_write_type and to_write_type not in [bytes, str]:
-            raise TypeError(f'Must be of type {to_write_type}: {prefix_type}')
+        if issubclass(to_write_type, Exception):
+            raise to_write
+
+        if (
+            prefix
+            and (
+                to_write_type not in acceptable_prefix_types
+                or prefix_type != to_write_type
+            )
+        ):
+            type_names = ' or '.join([t.__name__ for t in acceptable_prefix_types])
+            addendum = f'"{to_write_type.__name__}" given to write with "{prefix_type.__name__}" as prefix.'
+            msg = f'Data to write and its prefix must be of types: {type_names}, but {addendum}'
+            raise TypeError(msg)
 
         self.to_write = to_write
         self.prefix = prefix

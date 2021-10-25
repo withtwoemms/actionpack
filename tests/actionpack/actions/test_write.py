@@ -36,6 +36,18 @@ class WriteTest(TestCase):
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, self.absfilepath)
 
+    def test_can_Write_raises_when_given_an_Exception_to_write(self):
+        exception = Exception('some error.')
+        with self.assertRaises(type(exception)):
+            Write(self.absfilepath, exception)
+
+    def test_can_Write_raises_when_given_an_prefix_of_different_type(self):
+        Write(self.absfilepath, to_write='data', prefix='prefix')  # should not fail
+        with self.assertRaises(TypeError):
+            Write(self.absfilepath, to_write=123, prefix='prefix')
+        with self.assertRaises(TypeError):
+            Write(self.absfilepath, to_write=123, prefix=123)
+
     @patch('pathlib.Path.open')
     def test_can_overWrite_bytes(self, mock_output):
         file = FakeFile(self.salutation.encode(), 'wb')

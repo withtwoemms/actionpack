@@ -96,6 +96,8 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
             return Result(outcome)
         try:
             outcome = Right(self.validate().instruction())
+            if issubclass(type(outcome.value), Exception):
+                raise outcome.value
             return Result(outcome)
         except Exception as e:
             if should_raise:

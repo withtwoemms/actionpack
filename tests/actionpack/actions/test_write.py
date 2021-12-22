@@ -39,7 +39,7 @@ class WriteTest(TestCase):
     def test_can_Write_raises_when_given_an_Exception_to_write(self):
         exception = Exception('some error.')
         with self.assertRaises(type(exception)):
-            Write(self.absfilepath, exception)
+            Write(self.absfilepath, exception).perform(should_raise=True)
 
     def test_can_Write_raises_when_given_an_prefix_of_different_type(self):
         Write(self.absfilepath, to_write='data', prefix='prefix')  # should not fail

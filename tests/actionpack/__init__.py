@@ -1,6 +1,6 @@
 from io import BytesIO
 from io import StringIO
-from typing import Union
+from typing import Callable
 
 from actionpack import Action
 from actionpack.action import Name
@@ -11,18 +11,17 @@ class FakeAction(Action[Name, Outcome]):
 
     result = 'Performing Action.'
 
-    def __init__(self, name: Name = None, exception=None):
+    def __init__(
+        self,
+        name: Name = None,
+        instruction_provider: Callable = None,
+    ):
         self.name = name
-        self.exception = exception
+        self.instruction_provider = instruction_provider
         self.state = {'this': 'state'}
 
     def instruction(self) -> str:
-        return self.result
-
-    def validate(self):
-        if self.exception:
-            raise self.exception
-        return super().validate()
+        return self.instruction_provider() if self.instruction_provider else self.result
 
 
 class FakeFile:

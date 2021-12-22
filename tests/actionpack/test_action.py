@@ -14,8 +14,21 @@ from tests.actionpack.actions import FakeWrite
 
 class ActionTest(TestCase):
 
+    def raise_failure(self):
+        raise self.exception
+
     def setUp(self) -> None:
         self.exception = Exception('something went wrong :/')
+
+    def test_Action_returning_exception_does_not_have_successful_Result(self):
+        result = FakeAction(instruction_provider=lambda: self.exception).perform()
+        self.assertIsInstance(result, Result)
+        self.assertFalse(result.successful)
+
+    def test_Action_initialized_with_Exception_has_unsuccessful_Result(self):
+        result = FakeAction(self.exception).perform()
+        self.assertIsInstance(result, Result)
+        self.assertFalse(result.successful)
 
     def test_Action_produces_Result_result_when_performed(self):
         result = FakeAction().perform()
@@ -23,24 +36,24 @@ class ActionTest(TestCase):
         self.assertEqual(result.value, FakeAction.result)
 
     def test_Action_produces_Result_if_exception_raised_when_performed(self):
-        result = FakeAction(exception=self.exception).perform()
+        result = FakeAction(instruction_provider=self.raise_failure).perform()
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, self.exception)
 
     def test_Action_can_raise_exception(self):
         with self.assertRaises(type(self.exception)):
-            FakeAction(exception=self.exception).perform(should_raise=True)
+            FakeAction(instruction_provider=self.raise_failure).perform(should_raise=True)
 
     def test_can_determine_if_Result_was_successful(self):
         success = FakeAction().perform()
-        failure = FakeAction(exception=self.exception).perform()
+        failure = FakeAction(instruction_provider=self.raise_failure).perform()
 
         self.assertTrue(success.successful)
         self.assertFalse(failure.successful)
 
     def test_Result_success_is_immutable(self):
         success = FakeAction().perform()
-        failure = FakeAction(exception=self.exception).perform()
+        failure = FakeAction(instruction_provider=self.raise_failure).perform()
 
         with self.assertRaises(AttributeError):
             success.successful = 'nah.'

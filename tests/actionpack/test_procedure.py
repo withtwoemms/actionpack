@@ -9,9 +9,15 @@ from tests.actionpack import FakeFile
 from tests.actionpack.actions import FakeWrite
 
 
+def raise_failure():
+    raise Exception('something went wrong :/')
+
+
 success = FakeAction(name='success')
-failure = FakeAction(name='failure',
-                     exception=Exception('something went wrong :/'))
+failure = FakeAction(
+    name='failure',
+    instruction_provider=raise_failure
+)
 
 
 def assertIsIterable(possible_collection):
@@ -86,7 +92,7 @@ class KeyedProcedureTest(TestCase):
 
     def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
         action1 = FakeAction[int, str]()
-        action2 = FakeAction[bool, str](exception=Exception())
+        action2 = FakeAction[bool, str](instruction_provider=raise_failure)
         action3 = FakeAction[float, str]()
 
         key1, key2, key3 = 1, False, 1.01

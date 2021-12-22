@@ -18,8 +18,6 @@ class Write(Action[Name, int]):
     ):
         acceptable_prefix_types = [bytes, str]
         prefix_type, to_write_type = type(prefix), type(to_write)
-        if issubclass(to_write_type, Exception):
-            raise to_write
 
         if (
             prefix

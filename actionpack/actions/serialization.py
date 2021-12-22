@@ -16,8 +16,6 @@ class Serialization(Action[Name, Outcome]):
         self.inverse = inverse
 
     def validate(self):
-        if isinstance(self.data, Exception):
-            raise self.data
         if not self.data:
             raise self.NoDataGiven()
         if not self.schema:

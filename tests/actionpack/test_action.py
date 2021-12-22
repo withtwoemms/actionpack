@@ -20,6 +20,16 @@ class ActionTest(TestCase):
     def setUp(self) -> None:
         self.exception = Exception('something went wrong :/')
 
+    def test_Action_returning_exception_does_not_have_successful_Result(self):
+        result = FakeAction(instruction_provider=lambda: self.exception).perform()
+        self.assertIsInstance(result, Result)
+        self.assertFalse(result.successful)
+
+    def test_Action_initialized_with_Exception_has_unsuccessful_Result(self):
+        result = FakeAction(self.exception).perform()
+        self.assertIsInstance(result, Result)
+        self.assertFalse(result.successful)
+
     def test_Action_produces_Result_result_when_performed(self):
         result = FakeAction().perform()
         self.assertIsInstance(result, Result)

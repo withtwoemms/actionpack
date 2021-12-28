@@ -50,19 +50,13 @@ class Result(Generic[Outcome]):
 
 class ActionType(type):
 
-    def _instruction(self):
-        raise self.failure
-
     def __call__(self, *args, **kwargs):
-        instance = super().__call__(*args, **kwargs)
-
         params = args + tuple(kwargs.values())
         for param in params:
             if issubclass(type(param), Exception):
-                self.failure = param
-                setattr(instance, 'instruction', self._instruction)
+                raise param
 
-        return instance
+        return super().__call__(*args, **kwargs)
 
 
 class Action(Generic[Name, Outcome], metaclass=ActionType):

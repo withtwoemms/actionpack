@@ -44,6 +44,10 @@ class Result(Generic[Outcome]):
         else:
             return super(Result, self).__delattr__(name)
 
+    def __repr__(self):
+        tmpl = Template(f'<{self.__class__.__name__}$status>')
+        return tmpl.substitute(status=f'|{self.successful}') if self.successful else tmpl.substitute(status='')
+
     class OutcomeMustBeOfTypeEither(Exception):
         pass
 

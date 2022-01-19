@@ -41,10 +41,13 @@ class Procedure(Generic[Name, Outcome]):
                     yield future.result()
 
     def __repr__(self):
-        header = '\nProcedure for performing the following Actions:\n'
+        num_actions = len(self.actions)
+        limit = 5
+        header = f'\nProcedure for performing {num_actions} Actions:\n'
         bullet = '  * '
-        actions = reduce(lambda a, b: str(a) + f'\n{bullet}' + str(b), self.actions)
-        return header + bullet + str(actions)
+        actions = self.actions[:limit]
+        action_list = reduce(lambda a, b: str(a) + f'\n{bullet}' + str(b), actions)
+        return header + bullet + str(action_list) + '\n  ...\n' if num_actions > limit else ''
 
     def __iter__(self):
         return self._actions

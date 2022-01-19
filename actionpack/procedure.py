@@ -48,10 +48,20 @@ class Procedure(Generic[Name, Outcome]):
                     yield future.result()
 
     def __repr__(self):
-        header = '\nProcedure for performing the following Actions:\n'
-        bullet = '  * '
-        actions = reduce(lambda a, b: str(a) + f'\n{bullet}' + str(b), self.actions)
-        return header + bullet + str(actions)
+        actions, spare = tee(self.actions, 2)
+        self.actions = spare
+        limit = 5
+        some_actions = list(islice(actions, limit))
+        try:
+            next(actions)
+            more_actions = True
+        except StopIteration:
+            more_actions = False
+        header = f'\nProcedure for performing the following Actions:\n'
+        tab = '  '
+        bullet = f'{tab}* '
+        action_list = reduce(lambda a, b: str(a) + f'\n{bullet}' + str(b), some_actions)
+        return header + bullet + str(action_list) + f'\n{tab}...\n' if more_actions else ''
 
     def __iter__(self):
         return self._actions

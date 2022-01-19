@@ -27,7 +27,7 @@ def assertIsIterable(possible_collection):
 class ProcedureTest(TestCase):
 
     def setUp(self):
-        self.procedure = Procedure(success, failure)
+        self.procedure = Procedure((success, failure))
 
     def test_Procedure_is_Iterable_of_Actions(self):
         assertIsIterable(self.procedure)
@@ -52,7 +52,7 @@ class ProcedureTest(TestCase):
 
     def test_can_validate_Procedure(self):
         with self.assertRaises(Procedure.NotAnAction):
-            Procedure('wut.', failure).validate()
+            Procedure(('wut.', failure)).validate()
 
     def test_can_execute_Procedure_asynchronously(self):
         file = FakeFile()
@@ -63,7 +63,7 @@ class ProcedureTest(TestCase):
         action1 = FakeWrite[str, int](file, question, delay=0.2)
         action2 = FakeWrite[str, int](file, wellwish, delay=0.1)
 
-        procedure = Procedure[str, int](action1, action2)
+        procedure = Procedure[str, int]((action1, action2))
         results = procedure.execute(should_raise=True, synchronously=False)
 
         assertIsIterable(results)
@@ -77,13 +77,13 @@ class ProcedureTest(TestCase):
 class KeyedProcedureTest(TestCase):
 
     def test_can_create_KeyedProcedure(self):
-        results = KeyedProcedure[str, str](success, failure).execute()
+        results = KeyedProcedure[str, str]((success, failure)).execute()
         results_dict = dict(results)
 
         self.assertIsInstance(results_dict[success.name], Result)
 
     def test_KeyedProcedure_execution_can_raise(self):
-        results = KeyedProcedure(success, failure).execute(should_raise=True)
+        results = KeyedProcedure((success, failure)).execute(should_raise=True)
 
         assertIsIterable(results)
         self.assertIsInstance(next(results), tuple)
@@ -98,9 +98,11 @@ class KeyedProcedureTest(TestCase):
         key1, key2, key3 = 1, False, 1.01
 
         results = KeyedProcedure(
-            action1.set(name=key1),
-            action2.set(name=key2),
-            action3.set(name=key3)
+            (
+                action1.set(name=key1),
+                action2.set(name=key2),
+                action3.set(name=key3)
+            )
         ).execute()
         results_dict = dict(results)
 
@@ -110,4 +112,4 @@ class KeyedProcedureTest(TestCase):
 
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
-            KeyedProcedure(FakeAction(), failure)
+            KeyedProcedure((FakeAction(), failure))

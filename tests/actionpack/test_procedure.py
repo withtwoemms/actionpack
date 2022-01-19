@@ -112,4 +112,4 @@ class KeyedProcedureTest(TestCase):
 
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
-            KeyedProcedure((FakeAction(), failure))
+            KeyedProcedure((FakeAction(), failure)).validate()

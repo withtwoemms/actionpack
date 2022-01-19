@@ -15,6 +15,7 @@ from actionpack import Action
 
 
 class Procedure(Generic[Name, Outcome]):
+
     def __init__(self, actions: Iterable[Action[Name, Outcome]]):
         if not (isinstance(actions, Iterator) or isinstance(actions, Iterable)):
             raise TypeError(f'Actions must be iterable. Received {type(actions)}.')
@@ -78,12 +79,11 @@ class Procedure(Generic[Name, Outcome]):
 
 class KeyedProcedure(Procedure[Name, Outcome]):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        actions = list(args)[0]
-        self.actions, self._actions, self.__actions = tee(actions, 3)
+    def __init__(self, actions: Iterable[Action[Name, Outcome]]):
+        if not (isinstance(actions, Iterator) or isinstance(actions, Iterable)):
+            raise TypeError(f'Actions must be iterable. Received {type(actions)}.')
 
-        self.validate()
+        self.actions, self._actions, self.__actions = tee(actions, 3)
 
     def validate(self):
         actions, spare = tee(self.__actions, 2)

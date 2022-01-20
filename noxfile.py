@@ -9,7 +9,8 @@ from subprocess import PIPE
 from typing import List
 
 
-OFFICIAL = strtobool(envvar.get('OFFICIAL', 'False'))
+COVERAGE = bool(strtobool(envvar.get('COVERAGE', 'True')))
+OFFICIAL = bool(strtobool(envvar.get('OFFICIAL', 'False')))
 PROJECT_NAME = 'actionpack'
 VENV = f'{PROJECT_NAME}-venv'
 TESTDIR = 'tests.actionpack'
@@ -18,8 +19,6 @@ USEVENV = envvar.get('USEVENV', False)
 EXAMPLE = envvar.get('EXAMPLE', 'actionpack')
 
 external = False if USEVENV else True
-unofficial_semver = r'^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?(.+)$'
-official_semver = r'^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$'
 supported_python_versions = [
     '3.6',
     '3.7',
@@ -35,6 +34,8 @@ def session_name(suffix: str):
 
 
 def semver(version: str):
+    unofficial_semver = r'^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?(.+)$'
+    official_semver = r'^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$'
     _semver = re.search(official_semver, version) or re.search(unofficial_semver, version)
     if _semver:
         return [val for val in _semver.groups() if val]
@@ -89,14 +90,21 @@ def test(session):
     if USEVENV:
         install(session)
 
-    session.run(
-        'python', '-m',
-        'coverage', 'run', '--source', f'{TESTDIR}', '--branch',
-        '-m', 'unittest', TESTNAME if TESTNAME else f'discover',
-        external=external
-    )
-    session.run('coverage', 'report', '-m', external=external)
-    session.run('coverage', 'xml', external=external)
+    if COVERAGE:
+        session.run(
+            'python', '-m',
+            'coverage', 'run', '--source', f'{TESTDIR}', '--branch',
+            '-m', 'unittest', TESTNAME if TESTNAME else f'discover',
+            external=external
+        )
+        session.run('coverage', 'report', '-m', external=external)
+        session.run('coverage', 'xml', external=external)
+    else:
+        session.run(
+            'python', '-m',
+            'unittest', TESTNAME if TESTNAME else f'discover',
+            external=external
+        )
 
 
 @nox.session(name=session_name('build'), python=supported_python_versions)

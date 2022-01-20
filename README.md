@@ -109,15 +109,27 @@ One can also create an `Action` from some arbitrary function
 
 # Development
 
-Build scripting is managed via [`Makefile`](https://www.gnu.org/software/make/manual/html_node/Introduction.html).
-Execute `make commands` to see the available commands.
-To get started, simply run `make`.
-Doing so will create a virtualenv loaded with the relevant dependencies.
-All tests can be run with `make tests` and a single test can be run with something like the following:
+### Setup
+
+Build scripting is managed via [`noxfile`](https://nox.thea.codes/en/stable/config.html).
+Execute `nox -l` to see the available commands (set the `USEVENV` environment variable to view virtualenv-oriented commands).
+To get started, simply run `nox`.
+Doing so will install `actionpack` on your PYTHONPATH.
+Using the `USEVENV` environment variable, a virtualenv can be created in the local ".nox/" directory with something like:
 
 ```
-make test TESTCASE=<tests-subdir>.<test-module>.<class-name>.<method-name>
+USEVENV=virtualenv nox -s actionpack-venv-install-3.10
 ```
+
+All tests can be run with `nox -s test` and a single test can be run with something like the following:
+
+```
+TESTNAME=<tests-subdir>.<test-module>.<class-name>.<method-name> nox -s test
+```
+
+Coverage reports are optional and can be disabled using the `COVERAGE` environment variable set to a falsy value like "no".
+
+### Homebrewed Actions
 
 Making new `actionpack.actions` is straightforward.
 After defining a class that inherits `Action`, ensure it has an `.instruction` method.

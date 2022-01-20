@@ -32,6 +32,10 @@ class Result(Generic[Outcome]):
         else:
             raise self.OutcomeMustBeOfTypeEither
 
+    def __repr__(self):
+        outcome = 'success' if self.successful else 'failure'
+        return f'<Result|{outcome}[{type(self.value).__name__}]>'
+
     def __setattr__(self, name, value):
         if name in self._immutables and getattr(self, name, None) is not None:
             raise AttributeError(f'Cannot modify `{name}`')

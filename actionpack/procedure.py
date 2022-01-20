@@ -39,12 +39,14 @@ class Procedure(Generic[Name, Outcome]):
         should_raise: bool = False,
         synchronously: bool = True
     ) -> Iterator[Result[Outcome]]:
+        actions, spare = tee(self._actions, 2)
+        self._actions = spare
         if synchronously:
-            for action in self:
+            for action in actions:
                 yield action.perform(should_raise=should_raise) if should_raise else action.perform()
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = {executor.submit(action._perform, should_raise=should_raise): str(action) for action in self}
+                futures = {executor.submit(action._perform, should_raise=should_raise): str(action) for action in actions}
                 for future in as_completed(futures):
                     yield future.result()
 

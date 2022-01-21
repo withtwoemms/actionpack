@@ -4,6 +4,7 @@ from os import getcwd as cwd
 from unittest import TestCase
 from unittest.mock import patch
 
+from actionpack import Action
 from actionpack.action import Result
 from actionpack.actions import Write
 from actionpack.utils import pickleable
@@ -36,17 +37,26 @@ class WriteTest(TestCase):
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, self.absfilepath)
 
-    def test_can_Write_raises_when_given_an_Exception_to_write(self):
+    def test_Write_raises_when_given_an_Exception_to_write(self):
         exception = Exception('some error.')
         with self.assertRaises(type(exception)):
             Write(self.absfilepath, exception).perform(should_raise=True)
 
-    def test_can_Write_raises_when_given_an_prefix_of_different_type(self):
-        Write(self.absfilepath, to_write='data', prefix='prefix')  # should not fail
-        with self.assertRaises(TypeError):
-            Write(self.absfilepath, to_write=123, prefix='prefix')
-        with self.assertRaises(TypeError):
-            Write(self.absfilepath, to_write=123, prefix=123)
+    def test_Write_does_not_raise_when_instantiated_with_unexpected_types(self):
+        write1 = Write(self.absfilepath, to_write='data', prefix='prefix')
+        self.assertIsInstance(write1, Write)
+
+        write2 = Write(self.absfilepath, to_write=123, prefix='prefix')
+        self.assertIsInstance(write2, Action.Guise)
+        result2 = write2.perform()
+        self.assertIsInstance(result2, Result)
+        self.assertIsInstance(result2.value, TypeError)
+
+        write3 = Write(self.absfilepath, to_write='123', prefix=123)
+        self.assertIsInstance(write3, Action.Guise)
+        result3 = write3.perform()
+        self.assertIsInstance(result3, Result)
+        self.assertIsInstance(result3.value, TypeError)
 
     @patch('pathlib.Path.open')
     def test_can_overWrite_bytes(self, mock_output):

@@ -32,6 +32,19 @@ class PipelineTest(TestCase):
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, contents)
 
+    @patch('pathlib.Path.exists')
+    def test_first_Pipeline_failure_prevents_further_execution(self, mock_exists):
+        bad_filename = 'bad/filename.txt'
+
+        mock_exists.return_value = False
+
+        pipeline = Pipeline(Read(bad_filename), ReadInput)
+        result = pipeline.perform()
+
+        self.assertIsInstance(result, Result)
+        self.assertIsInstance(result.value, FileNotFoundError)
+        self.assertEqual(str(result.value), bad_filename)
+
     @patch('pathlib.Path.open')
     @patch('pathlib.Path.exists')
     @patch('builtins.input')

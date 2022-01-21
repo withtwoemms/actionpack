@@ -20,7 +20,6 @@ EXAMPLE = envvar.get('EXAMPLE', 'actionpack')
 
 external = False if USEVENV else True
 supported_python_versions = [
-    '3.6',
     '3.7',
     '3.8',
     '3.9',

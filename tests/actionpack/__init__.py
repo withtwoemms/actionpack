@@ -14,8 +14,12 @@ class FakeAction(Action[Name, Outcome]):
     def __init__(
         self,
         name: Name = None,
+        typecheck = None,
         instruction_provider: Callable = None,
     ):
+        if typecheck:
+            raise TypeError(str(typecheck))
+
         self.name = name
         self.instruction_provider = instruction_provider
         self.state = {'this': 'state'}

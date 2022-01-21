@@ -61,6 +61,13 @@ class ActionTest(TestCase):
         with self.assertRaises(AttributeError):
             failure.successful = 'maybe?'
 
+    def test_Action_Guise(self):
+        guise = FakeAction(typecheck='Action instantiation fails.')
+        result = guise.perform()
+        self.assertIsInstance(guise, Action.Guise)
+        self.assertIsInstance(result, Result)
+        self.assertIsInstance(result.value, Exception)
+
     def test_Action_can_be_serialized(self):
         action = FakeAction()
         pickled = pickle.dumps(action)

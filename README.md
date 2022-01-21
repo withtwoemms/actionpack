@@ -71,7 +71,7 @@ An `Action` collection can be used to describe a procedure:
 ...                        delay_between_attempts=2)
 ...            Write('path/to/yet/another/file', 'sup')]
 ...
->>> procedure = Procedure(*actions)
+>>> procedure = Procedure(actions)
 ```
 
 And a `Procedure` can be executed synchronously or otherwise:
@@ -91,7 +91,7 @@ The `Action` names are used as keys for convenient result lookup.
 >>> saveme = ReadInput(prompt).set(name='saveme')
 >>> writeme = Write('path/to/yet/another/file', 'sup').set(name='writeme')
 >>> actions = [saveme, writeme]
->>> keyed_procedure = KeyedProcedure(*actions)
+>>> keyed_procedure = KeyedProcedure(actions)
 >>> results = keyed_procedure.execute()
 >>> keyed_results = dict(results)
 >>> first, second = keyed_results.get('saveme'), keyed_results.get('writeme')

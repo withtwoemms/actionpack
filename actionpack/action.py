@@ -54,17 +54,22 @@ class Result(Generic[Outcome]):
 
 class ActionType(type):
 
-    def _instruction(self):
-        raise self.failure
-
     def __call__(self, *args, **kwargs):
-        instance = super().__call__(*args, **kwargs)
+        failure = None
+
+        def instruction():
+            raise failure
+
+        try:
+            instance = super().__call__(*args, **kwargs)
+        except Exception as e:
+            return Action.Guise(e)
 
         params = args + tuple(kwargs.values())
         for param in params:
             if issubclass(type(param), Exception):
-                self.failure = param
-                setattr(instance, 'instruction', self._instruction)
+                failure = param
+                setattr(instance, 'instruction', instruction)
 
         return instance
 
@@ -144,6 +149,16 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
 
     class NotComparable(Exception):
         pass
+
+    class Guise:
+        def __init__(self, failure: Exception):
+            self.failure = failure
+
+        def perform(self, should_raise: bool = False) -> Result:
+            return Result(Left(self.failure))
+
+        def __repr__(self):
+            return f'<Action.Guise[{self.failure.__class__.__name__}]>'
 
     class DependencyCheck:
         def __init__(self, cls, requirement: str = None):

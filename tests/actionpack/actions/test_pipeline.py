@@ -38,11 +38,11 @@ class PipelineTest(TestCase):
 
         mock_exists.return_value = False
 
-        pipeline = Pipeline(Read(bad_filename), ReadInput, Write)
+        pipeline = Pipeline(Read(bad_filename), ReadInput)
         result = pipeline.perform()
 
         self.assertIsInstance(result, Result)
-        self.assertIsInstance(result.value, Exception)
+        self.assertIsInstance(result.value, FileNotFoundError)
         self.assertEqual(str(result.value), bad_filename)
 
     @patch('pathlib.Path.open')

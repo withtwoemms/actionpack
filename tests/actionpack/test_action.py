@@ -62,9 +62,10 @@ class ActionTest(TestCase):
             failure.successful = 'maybe?'
 
     def test_Action_Construct(self):
-        guise = FakeAction(typecheck='Action instantiation fails.')
-        result = guise.perform()
-        self.assertIsInstance(guise, Action.Construct)
+        construct = FakeAction(typecheck='Action instantiation fails.')
+        result = construct.perform()
+        self.assertEqual(construct.failure, result.value)
+        self.assertIsInstance(construct, Action.Construct)
         self.assertIsInstance(result, Result)
         self.assertIsInstance(result.value, Exception)
 

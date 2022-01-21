@@ -5,6 +5,7 @@
 [![tests](https://github.com/withtwoemms/actionpack/workflows/tests/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Atests)
 [![codecov](https://codecov.io/gh/withtwoemms/actionpack/branch/main/graph/badge.svg?token=27Z4W0COFH)](https://codecov.io/gh/withtwoemms/actionpack)
 [![publish](https://github.com/withtwoemms/actionpack/workflows/publish/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Apublish)
+[![PyPI version](https://badge.fury.io/py/actionpack.svg)](https://badge.fury.io/py/actionpack)
 
 # Overview
 

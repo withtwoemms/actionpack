@@ -18,7 +18,7 @@ class Procedure(Generic[Name, Outcome]):
 
     def __init__(self, actions: Iterable[Action[Name, Outcome]]):
         if not (isinstance(actions, Iterator) or isinstance(actions, Iterable)):
-            raise TypeError(f'Actions must be iterable. Received {type(actions)}.')
+            raise TypeError(f'Actions must be iterable. Received {type(actions).__name__}.')
 
         self.actions, self._actions, self.__actions = tee(actions, 3)
 

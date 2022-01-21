@@ -43,17 +43,17 @@ Sometimes `ActionType`s in a `Pipeline` don't "fit" together.
 That's where the `Pipeline.Fitting` comes in:
 
 ```python
->>> listen = ReadInput('What should I record? ')
->>> record = Pipeline.Fitting(
-...     action=Write,
-...     **{
-...         'prefix': f'[{datetime.now()}] ',
-...         'append': True,
-...         'filename': filename,
-...         'to_write': Pipeline.Receiver
-...     },
-... )
->>> Pipeline(listen, record).perform()
+listen = ReadInput('What should I record? ')
+record = Pipeline.Fitting(
+    action=Write,
+    **{
+        'prefix': f'[{datetime.now()}] ',
+        'append': True,
+        'filename': filename,
+        'to_write': Pipeline.Receiver
+    },
+)
+Pipeline(listen, record).perform()
 ```
 
 > ⚠️ **_NOTE:_**  Writing to stdout is also possible using the `Write.STDOUT` object as a filename. How that works is an exercise left for the user.
@@ -63,39 +63,39 @@ That's where the `Pipeline.Fitting` comes in:
 An `Action` collection can be used to describe a procedure:
 
 ```python
->>> actions = [action,
-...            Read('path/to/some/other/file'),
-...            ReadInput('>>> how goes? <<<\n  > '),
-...            MakeRequest('GET', 'http://google.com'),
-...            RetryPolicy(MakeRequest('GET', 'http://bad-connectivity.com'),
-...                        max_retries=2,
-...                        delay_between_attempts=2)
-...            Write('path/to/yet/another/file', 'sup')]
-...
->>> procedure = Procedure(actions)
+actions = [action,
+           Read('path/to/some/other/file'),
+           ReadInput('>>> how goes? <<<\n  > '),
+           MakeRequest('GET', 'http://google.com'),
+           RetryPolicy(MakeRequest('GET', 'http://bad-connectivity.com'),
+                       max_retries=2,
+                       delay_between_attempts=2)
+           Write('path/to/yet/another/file', 'sup')]
+
+procedure = Procedure(actions)
 ```
 
 And a `Procedure` can be executed synchronously or otherwise:
 
 ```python
->>> results = procedure.execute()  # synchronously by default
->>> _results = procedure.execute(synchronously=False)  # async; not thread safe
->>> result = next(results)
->>> print(result.value)
+results = procedure.execute()  # synchronously by default
+_results = procedure.execute(synchronously=False)  # async; not thread safe
+result = next(results)
+print(result.value)
 ```
 
 A `KeyedProcedure` is just a `Procedure` comprised of named `Action`s.
 The `Action` names are used as keys for convenient result lookup.
 
 ```python
->>> prompt = '>>> sure, I'll save it for ya.. <<<\n  > '
->>> saveme = ReadInput(prompt).set(name='saveme')
->>> writeme = Write('path/to/yet/another/file', 'sup').set(name='writeme')
->>> actions = [saveme, writeme]
->>> keyed_procedure = KeyedProcedure(actions)
->>> results = keyed_procedure.execute()
->>> keyed_results = dict(results)
->>> first, second = keyed_results.get('saveme'), keyed_results.get('writeme')
+prompt = '>>> sure, I'll save it for ya.. <<<\n  > '
+saveme = ReadInput(prompt).set(name='saveme')
+writeme = Write('path/to/yet/another/file', 'sup').set(name='writeme')
+actions = [saveme, writeme]
+keyed_procedure = KeyedProcedure(actions)
+results = keyed_procedure.execute()
+keyed_results = dict(results)
+first, second = keyed_results.get('saveme'), keyed_results.get('writeme')
 ```
 
 > ⚠️ **_NOTE:_**  `Procedure` elements are evaluated _independently_ unlike with a `Pipeline` in which the result of performing an `Action` is passed to the next `ActionType`.

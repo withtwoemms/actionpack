@@ -47,13 +47,13 @@ class WriteTest(TestCase):
         self.assertIsInstance(write1, Write)
 
         write2 = Write(self.absfilepath, to_write=123, prefix='prefix')
-        self.assertIsInstance(write2, Action.Guise)
+        self.assertIsInstance(write2, Action.Construct)
         result2 = write2.perform()
         self.assertIsInstance(result2, Result)
         self.assertIsInstance(result2.value, TypeError)
 
         write3 = Write(self.absfilepath, to_write='123', prefix=123)
-        self.assertIsInstance(write3, Action.Guise)
+        self.assertIsInstance(write3, Action.Construct)
         result3 = write3.perform()
         self.assertIsInstance(result3, Result)
         self.assertIsInstance(result3.value, TypeError)

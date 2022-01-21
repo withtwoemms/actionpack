@@ -63,7 +63,7 @@ class ActionType(type):
         try:
             instance = super().__call__(*args, **kwargs)
         except Exception as e:
-            return Action.Guise(e)
+            return Action.Construct(e)
 
         params = args + tuple(kwargs.values())
         for param in params:
@@ -150,7 +150,7 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
     class NotComparable(Exception):
         pass
 
-    class Guise:
+    class Construct:
         def __init__(self, failure: Exception):
             self.failure = failure
 
@@ -158,7 +158,7 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
             return Result(Left(self.failure))
 
         def __repr__(self):
-            return f'<Action.Guise[{self.failure.__class__.__name__}]>'
+            return f'<Action.Construct[{self.failure.__class__.__name__}]>'
 
     class DependencyCheck:
         def __init__(self, cls, requirement: str = None):

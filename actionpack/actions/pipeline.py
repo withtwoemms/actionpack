@@ -21,7 +21,7 @@ class Pipeline(Action):
                 raise TypeError(f'Must be an {ActionType.__name__}: {action_type}')
 
         self.action_types = action_types
-        self._action_types = iter(self.action_types)
+        self._action_types = iter(action_types)
 
     def instruction(self):
         return self.flush(self.action).perform(should_raise=self.should_raise).value
@@ -40,14 +40,13 @@ class Pipeline(Action):
                 params_dict.pop('self', None)
                 params = list(params_dict.keys())
                 conduit = first(params)
-                if conduit in next_action_type.kwargs and key_for(Pipeline.Receiver, next_action_type.kwargs):
-                    params = swap(
-                        params, 0,
-                        params.index(key_for(Pipeline.Receiver, next_action_type.kwargs))
-                    )
+                key = key_for(Pipeline.Receiver, dict(next_action_type.kwargs))
+                if conduit in next_action_type.kwargs and key:
+                    params = swap(params, 0, params.index(key))
                 keyed_result = dict(zip(params, [keyed_result['action']]))
                 next_action_type.kwargs.update(keyed_result)
                 next_action = next_action_type.action(**next_action_type.kwargs)
+                next_action_type.kwargs[key] = Pipeline.Receiver
             else:
                 next_action = next_action_type(**keyed_result)
 
@@ -62,7 +61,7 @@ class Pipeline(Action):
         try:
             return next(self._action_types)
         except StopIteration:
-            self._action_types = iter(self._action_types)
+            self._action_types = iter(self.action_types)
 
     class Receiver:
         pass

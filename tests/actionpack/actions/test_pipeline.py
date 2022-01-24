@@ -32,6 +32,31 @@ class PipelineTest(TestCase):
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, contents)
 
+    @patch('pathlib.Path.open')
+    @patch('pathlib.Path.exists')
+    @patch('builtins.input')
+    def test_can_perform_Pipeline_repeatedly(self, mock_input, mock_exists, mock_file):
+        filename = 'this/file.txt'
+        contents = b'Look at the little Om. Isn\'t he sweet?'
+        file = FakeFile(contents)
+
+        mock_file.return_value = file
+        mock_exists.return_value = True
+        mock_input.return_value = filename
+
+        pipeline = Pipeline(ReadInput('Which file?'), Read)
+        result = pipeline.perform()
+
+        self.assertIsInstance(result, Result)
+        self.assertEqual(result.value, contents)
+        self.assertEqual(file.read(), contents)
+
+        second_result = pipeline.perform()
+
+        self.assertIsInstance(second_result, Result)
+        self.assertEqual(second_result.value, contents)
+        self.assertEqual(file.read(), contents)
+
     @patch('pathlib.Path.exists')
     def test_first_Pipeline_failure_prevents_further_execution(self, mock_exists):
         bad_filename = 'bad/filename.txt'
@@ -101,3 +126,37 @@ class PipelineTest(TestCase):
         self.assertEqual(file.read(), reply + b'\n')
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, f'{cwd()}/{filename}')
+
+    @patch('pathlib.Path.open')
+    @patch('pathlib.Path.exists')
+    @patch('builtins.input')
+    def test_can_repeatedly_perform_Pipeline_with_Receiver(self, mock_input, mock_exists, mock_file):
+        filename = 'this/file.txt'
+        file = FakeFile()
+        reply = b'The machines have worked perfectly up till now.'
+
+        mock_file.return_value = file
+        mock_exists.return_value = True
+        mock_input.return_value = reply
+
+        read_input = ReadInput('What would you like to record?')
+        action_types = [
+            Pipeline.Fitting(
+                action=Write,
+                reaction=Call(Closure(bytes.decode)),
+                **{'append': True, 'filename': filename, 'to_write': Pipeline.Receiver},
+            )
+        ]
+        pipeline = Pipeline(read_input, *action_types, should_raise=True)
+        result = pipeline.perform(should_raise=True)
+
+        self.assertEqual(file.read(), reply + b'\n')
+        self.assertIsInstance(result, Result)
+        self.assertEqual(result.value, f'{cwd()}/{filename}')
+
+        second_result = pipeline.perform(should_raise=True)
+
+        self.assertEqual(file.read(), reply + b'\n' + reply + b'\n')
+        self.assertIsInstance(second_result, Result)
+        self.assertEqual(second_result.value, f'{cwd()}/{filename}')
+

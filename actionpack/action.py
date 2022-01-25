@@ -7,11 +7,13 @@ from subprocess import PIPE
 from subprocess import run
 from sys import executable as python
 from threading import RLock
-from typing import Optional
+from typing import Callable
 from typing import Generic
+from typing import Optional
 from typing import TypeVar
 from typing import Union
 
+from actionpack.utils import microsecond_timestamp
 from actionpack.utils import synchronized
 
 
@@ -24,13 +26,19 @@ class Result(Generic[Outcome]):
 
     _immutables = ('successful',)
 
-    def __init__(self, outcome: Either):
+    def __init__(
+        self,
+        outcome: Either,
+        timestamp_provider: Callable[[], int] = microsecond_timestamp
+    ):
         self.value: Optional[ResultValue[Outcome]] = None
         if type(outcome) in [Left, Right]:
             self.value = outcome.value
             self.successful = True if isinstance(outcome, Right) else False
         else:
             raise self.OutcomeMustBeOfTypeEither
+
+        self.produced_at = timestamp_provider()
 
     def __repr__(self):
         outcome = 'success' if self.successful else 'failure'
@@ -85,8 +93,12 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
         pass
 
     @synchronized(lock)
-    def perform(self, should_raise: bool = False) -> Result[Outcome]:
-        return self._perform(should_raise)
+    def perform(
+        self,
+        should_raise: bool = False,
+        timestamp_provider: Callable[[], int] = microsecond_timestamp
+    ) -> Result[Outcome]:
+        return self._perform(should_raise, timestamp_provider)
 
     def validate(self):
         return self
@@ -112,20 +124,24 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
             if not hasattr(cls, requirement):
                 Action.DependencyCheck(cls, requirement)
 
-    def _perform(self, should_raise: bool = False) -> Result[Outcome]:
+    def _perform(
+        self,
+        should_raise: bool = False,
+        timestamp_provider: Callable[[], int] = microsecond_timestamp
+    ) -> Result[Outcome]:
         if not callable(self.instruction):
             outcome = Left(TypeError(f'Must be callable: {self.instruction}'))
-            return Result(outcome)
-        try:
-            outcome = Right(self.validate().instruction())
-            if issubclass(type(outcome.value), Exception):
-                raise outcome.value
-            return Result(outcome)
-        except Exception as e:
-            if should_raise:
-                raise e
-            outcome = Left(e)
-            return Result(outcome)
+        else:
+            try:
+                outcome = Right(self.validate().instruction())
+                if issubclass(type(outcome.value), Exception):
+                    raise outcome.value
+            except Exception as e:
+                if should_raise:
+                    raise e
+                outcome = Left(e)
+
+        return Result(outcome, timestamp_provider)
 
     def __init_subclass__(cls, requires=None):
         if requires:

@@ -61,6 +61,14 @@ class ActionTest(TestCase):
         with self.assertRaises(AttributeError):
             failure.successful = 'maybe?'
 
+    def test_Result_has_timestamp(self):
+        result = FakeAction(instruction_provider=lambda: 'succeeded').perform(
+            timestamp_provider=lambda: 0
+        )
+
+        self.assertTrue(result.successful)
+        self.assertEqual(result.produced_at, 0)
+
     def test_Action_Construct(self):
         construct = FakeAction(typecheck='Action instantiation fails.')
         result = construct.perform()

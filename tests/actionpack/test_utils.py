@@ -1,6 +1,8 @@
+from datetime import datetime
 from unittest import TestCase
 
 from actionpack.utils import Closure
+from actionpack.utils import microsecond_timestamp
 from actionpack.utils import pickleable
 from actionpack.utils import tally
 
@@ -36,8 +38,11 @@ class UtilsTest(TestCase):
         self.assertIn(str(kwarg), repr(closure))
 
     def test_Closure_does_not_accept_lambdas(self):
+        value = 'no good.'
+        function = lambda: value
+        self.assertEqual(function(), value)
         with self.assertRaises(Closure.LambdaNotAllowed):
-            Closure(lambda: 'no good.', 'this', should='fail')
+            Closure(function, 'this', should='fail')
 
     def test_Closure_repr(self):
         closure = Closure(function, arg, kwarg=kwarg)
@@ -51,8 +56,14 @@ class UtilsTest(TestCase):
         self.assertEqual(list(tally(2)), [1, 1])
 
     def test_pickleable(self):
+        self.assertEqual(CannotPickleMe().get_pickle_juice(), CannotPickleMe.juice)
         self.assertTrue(pickleable(CanPickleMe()))
         self.assertFalse(pickleable(CannotPickleMe()))
+
+    def test_microsecond_timestamp(self):
+        epoch = datetime(1970, 1, 1, 0, 0)  # 0 seconds since Epoch
+        self.assertEqual(microsecond_timestamp(lambda: epoch), 0)
+
 
 
 class CanPickleMe:
@@ -60,8 +71,10 @@ class CanPickleMe:
 
 
 class CannotPickleMe:
+    juice = 'here ya go'
+
     def __init__(self):
-        self.get_pickle_juice = lambda: 'here ya go'
+        self.get_pickle_juice = lambda: self.juice
 
 
 def function(*args, **kwargs):

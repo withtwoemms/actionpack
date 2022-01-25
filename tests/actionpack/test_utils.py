@@ -1,6 +1,8 @@
+from datetime import datetime
 from unittest import TestCase
 
 from actionpack.utils import Closure
+from actionpack.utils import microsecond_timestamp
 from actionpack.utils import pickleable
 from actionpack.utils import tally
 
@@ -53,6 +55,11 @@ class UtilsTest(TestCase):
     def test_pickleable(self):
         self.assertTrue(pickleable(CanPickleMe()))
         self.assertFalse(pickleable(CannotPickleMe()))
+
+    def test_microsecond_timestamp(self):
+        epoch = datetime(1970, 1, 1, 0, 0)  # 0 seconds since Epoch
+        self.assertEqual(microsecond_timestamp(lambda: epoch), 0)
+
 
 
 class CanPickleMe:

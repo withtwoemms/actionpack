@@ -1,5 +1,7 @@
 import pickle
 
+from calendar import timegm
+from datetime import datetime
 from functools import wraps
 from typing import Callable
 from typing import Dict
@@ -79,3 +81,9 @@ def key_for(value: T, dct: Dict) -> Optional[T]:
 def swap(lst: List, idx1: int, idx2: int) -> List:
     lst[idx1], lst[idx2] = lst[idx2], lst[idx1]
     return lst
+
+
+def microsecond_timestamp(clock: Callable[[], datetime] = datetime.utcnow) -> int:
+    now = clock()
+    return  int(timegm(now.timetuple()) * 1e6 + now.microsecond)
+

@@ -1,10 +1,12 @@
 from collections import OrderedDict
 from inspect import signature
+from typing import Callable
 from typing import Optional
 
 from actionpack import Action
 from actionpack.action import ActionType
 from actionpack.actions import Call
+from actionpack.utils import Closure
 from actionpack.utils import first
 from actionpack.utils import key_for
 from actionpack.utils import swap
@@ -44,6 +46,8 @@ class Pipeline(Action):
                 if conduit in next_action_type.kwargs and key:
                     params = swap(params, 0, params.index(key))
                 keyed_result = dict(zip(params, [keyed_result['action']]))
+                if conduit == 'closure':
+                    keyed_result['closure'] = Closure(next_action_type.enclose, keyed_result['closure'])
                 next_action_type.kwargs.update(keyed_result)
                 next_action = next_action_type.action(**next_action_type.kwargs)
                 next_action_type.kwargs[key] = Pipeline.Receiver
@@ -70,8 +74,9 @@ class Pipeline(Action):
 
         @staticmethod
         def init(
-            action: Action,
+            action: ActionType,
             should_raise: bool = False,
+            enclose: Callable = None,
             reaction: Call = None,
             *args, **kwargs
         ):
@@ -86,8 +91,9 @@ class Pipeline(Action):
 
         def __new__(
             mcs,
-            action: Action,
+            action: ActionType,
             should_raise: bool = False,
+            enclose: Callable = None,
             reaction: Call = None,
             **kwargs
         ):
@@ -95,6 +101,7 @@ class Pipeline(Action):
             dct['__init__'] = Pipeline.Fitting.init
             dct['instruction'] = Pipeline.Fitting.instruction
             dct['action'] = action
+            dct['enclose'] = enclose
             dct['should_raise'] = should_raise
             dct['reaction'] = reaction
             dct['kwargs'] = kwargs

@@ -9,6 +9,7 @@ from actionpack.actions import Read
 from actionpack.actions import Write
 from actionpack.actions.pipeline import Call
 from actionpack.utils import Closure
+from tests.actionpack import FakeAction
 from tests.actionpack import FakeFile
 
 
@@ -160,3 +161,28 @@ class PipelineTest(TestCase):
         self.assertIsInstance(second_result, Result)
         self.assertEqual(second_result.value, f'{cwd()}/{filename}')
 
+    def test_can_Pipeline_multiple_calls(self):
+        response = "We can't leave him here. May I keep him?"
+
+        def first_function(param):
+            return 'first', param
+
+        def second_function(param):
+            return 'second', param
+
+        action = FakeAction(instruction_provider=lambda: response)
+        action_types = [
+            Pipeline.Fitting(
+                action=Call,
+                enclose=first_function,
+            ),
+            Pipeline.Fitting(
+                action=Call,
+                enclose=second_function,
+            )
+        ]
+        pipeline = Pipeline(action, *action_types, should_raise=True)
+        result = pipeline.perform(should_raise=True)
+
+        self.assertIsInstance(result, Result)
+        self.assertEqual(result.value, ('second', ('first', response)))

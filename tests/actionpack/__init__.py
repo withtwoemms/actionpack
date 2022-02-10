@@ -1,5 +1,6 @@
 from io import BytesIO
 from io import StringIO
+from typing import Any
 from typing import Callable
 
 from actionpack import Action
@@ -14,8 +15,8 @@ class FakeAction(Action[Name, Outcome]):
     def __init__(
         self,
         name: Name = None,
-        typecheck = None,
-        instruction_provider: Callable = None,
+        typecheck: Any = None,
+        instruction_provider: Callable[[], Any] = None,
     ):
         if typecheck:
             raise TypeError(str(typecheck))

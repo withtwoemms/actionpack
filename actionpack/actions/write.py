@@ -15,6 +15,7 @@ class Write(Action[Name, int]):
         prefix: Optional[str] = None,
         overwrite: bool = False,
         append: bool = False,
+        mkdir: bool = False,
     ):
         acceptable_prefix_types = [bytes, str]
         prefix_type, to_write_type = type(prefix), type(to_write)
@@ -35,6 +36,7 @@ class Write(Action[Name, int]):
         self.prefix = prefix
         self.append = append
         self.overwrite = overwrite
+        self.mkdir = mkdir
         self.area = None
         self.path = None
 
@@ -57,6 +59,9 @@ class Write(Action[Name, int]):
             mode, msg = 'a', f"{self.prefix if self.prefix else ''}{self.to_write}"
         else:
             raise TypeError(f'Must be of str or bytes: {self.to_write}')
+
+        if self.mkdir and not self.path.is_dir():
+            self.path.resolve().parent.mkdir(parents=True, exist_ok=True)
 
         if self.append:
             rchar = b'\n' if mode == 'ab' else '\n'

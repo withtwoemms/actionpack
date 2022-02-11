@@ -104,6 +104,23 @@ class WriteTest(TestCase):
             file.read()
         )
 
+    @patch('pathlib.Path.mkdir')
+    @patch('pathlib.Path.exists')
+    @patch('pathlib.Path.open')
+    def test_can_make_directory_on_Write(self, mock_open, mock_exists, mock_mkdir):
+        declaration = "I don't want him hurt."
+        exclamation = " Jurgal's animal is insane!"
+        file = FakeFile(declaration, mode='a')
+        mock_mkdir.return_value = None
+        mock_exists.side_effect = [False, True]
+        mock_open.return_value = file
+        filename = 'directory/file'
+        action = Write(filename=filename, to_write=exclamation, overwrite=True, mkdir=True)
+        result = action.perform()
+
+        self.assertTrue(action.path.parent.exists())
+        self.assertTrue(result.successful)
+
     @patch('pathlib.Path.open')
     def test_cannot_overwrite_and_append(self, mock_output):
         file = FakeFile(self.salutation)

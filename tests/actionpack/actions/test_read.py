@@ -13,6 +13,10 @@ class ReadTest(TestCase):
 
     contents = 'some file contents.'
 
+    def test_instantiate_given_invalid_output_type(self):
+        result = Read('some-file.name', output_type=100).perform()
+        self.assertIsInstance(result.value, TypeError)
+
     @patch('pathlib.Path.read_bytes')
     def test_can_Read_bytes(self, mock_input):
         contents = self.contents.encode()

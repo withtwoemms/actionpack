@@ -51,6 +51,25 @@ class ActionTest(TestCase):
         self.assertTrue(success.successful)
         self.assertFalse(failure.successful)
 
+    def test_can_react_to_failure(self):
+        vessel = []
+        contents = 'contents'
+
+        def fill():
+            vessel.append(contents)
+
+        self.assertNotIn(contents, vessel)
+
+        reaction = FakeAction(instruction_provider=fill)
+        action = FakeAction(
+            instruction_provider=self.raise_failure,
+            reaction=reaction
+        )
+        result = action.perform()
+
+        self.assertFalse(result.successful)
+        self.assertIn(contents, vessel)
+
     def test_Result_success_is_immutable(self):
         success = FakeAction().perform()
         failure = FakeAction(instruction_provider=self.raise_failure).perform()

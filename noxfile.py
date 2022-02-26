@@ -92,7 +92,8 @@ def test(session):
     if COVERAGE:
         session.run(
             'python', '-m',
-            'coverage', 'run', '--source', f'{TESTDIR}', '--branch',
+            'coverage', 'run', '--source', '.', '--branch',
+            '--omit', '**tests/*,**/__*__.py,noxfile.py,setup.py',
             '-m', 'unittest', TESTNAME if TESTNAME else f'discover',
             external=external
         )
@@ -109,4 +110,3 @@ def test(session):
 @nox.session(name=session_name('build'), python=supported_python_versions)
 def build(session):
     session.run('python', 'setup.py', 'sdist')
-

@@ -9,10 +9,20 @@ from actionpack.utils import tally
 
 
 class RetryPolicy(Action[Name, Outcome]):
-    def __init__(self, action: Action[Name, Outcome], max_retries: int, delay_between_attempts: int = 0):
+    def __init__(
+        self,
+        action: Action[Name, Outcome],
+        max_retries: int,
+        delay_between_attempts: int = 0,
+        should_record: bool = False
+    ):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
+        self.should_record = should_record
+
+        if self.should_record:
+            self.attempts = []
 
     def instruction(self) -> Outcome:
         return self.enact(self.delay_between_attempts)
@@ -30,16 +40,19 @@ class RetryPolicy(Action[Name, Outcome]):
         initial_attempt = self.action.perform()
         if initial_attempt.successful:
             return initial_attempt.value
+        elif self.should_record:
+            self.attempts.append(initial_attempt)
 
         for _tally in tally(self.max_retries):
             sleep(with_delay)
             counter += _tally
+            self.retries = counter
             retry = self.action.perform()
             if retry.successful:
-                self.retries = counter
                 return retry.value
+            elif self.should_record:
+                self.attempts.append(retry)
 
-        self.retries = counter
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 
     def __repr__(self):

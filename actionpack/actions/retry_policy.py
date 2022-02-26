@@ -43,7 +43,7 @@ class RetryPolicy(Action[Name, Outcome]):
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 
     def __repr__(self):
-        tmpl = Template('$class_name($max_retries x $action_name$delay)')
+        tmpl = Template('<$class_name($max_retries x $action_name$delay)>')
         return tmpl.substitute(
             class_name=self.__class__.__name__,
             max_retries=self.max_retries,

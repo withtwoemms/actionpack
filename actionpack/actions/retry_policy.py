@@ -9,10 +9,20 @@ from actionpack.utils import tally
 
 
 class RetryPolicy(Action[Name, Outcome]):
-    def __init__(self, action: Action[Name, Outcome], max_retries: int, delay_between_attempts: int = 0):
+    def __init__(
+        self,
+        action: Action[Name, Outcome],
+        max_retries: int,
+        delay_between_attempts: int = 0,
+        should_record: bool = False
+    ):
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
+        self.should_record = should_record
+
+        if self.should_record:
+            self.attempts = []
 
     def instruction(self) -> Outcome:
         return self.enact(self.delay_between_attempts)
@@ -27,20 +37,26 @@ class RetryPolicy(Action[Name, Outcome]):
             return self
 
     def enact(self, with_delay: int = 0, counter: int = 0) -> Outcome:
-        result = self.action.perform()
+        initial_attempt = self.action.perform()
+        if initial_attempt.successful:
+            return initial_attempt.value
+        elif self.should_record:
+            self.attempts.append(initial_attempt)
+
         for _tally in tally(self.max_retries):
-            if isinstance(result.value, Exception):
-                counter += _tally
-                result = self.action.perform()
-                sleep(with_delay)
-            else:
-                self.retries = counter
-                return result.value
-        self.retries = counter
+            sleep(with_delay)
+            counter += _tally
+            self.retries = counter
+            retry = self.action.perform()
+            if retry.successful:
+                return retry.value
+            elif self.should_record:
+                self.attempts.append(retry)
+
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 
     def __repr__(self):
-        tmpl = Template('$class_name($max_retries x $action_name$delay)')
+        tmpl = Template('<$class_name($max_retries x $action_name$delay)>')
         return tmpl.substitute(
             class_name=self.__class__.__name__,
             max_retries=self.max_retries,

@@ -21,6 +21,9 @@ Outcome = TypeVar('Outcome')
 Name = TypeVar('Name')
 ResultValue = Union[Outcome, Exception]
 
+T = TypeVar('T')
+V = TypeVar('V')
+
 
 class Result(Generic[Outcome]):
 
@@ -62,7 +65,7 @@ class Result(Generic[Outcome]):
 
 class ActionType(type):
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, reaction: Optional[Action[T, V]] = None, **kwargs):
         failure = None
 
         def instruction():
@@ -70,6 +73,7 @@ class ActionType(type):
 
         try:
             instance = super().__call__(*args, **kwargs)
+            instance.__reaction = reaction
         except Exception as e:
             return Action.Construct(e)
 
@@ -140,6 +144,8 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
                 if should_raise:
                     raise e
                 outcome = Left(e)
+                if self._ActionType__reaction:
+                    self._ActionType__reaction.perform(should_raise=should_raise)
 
         return Result(outcome, timestamp_provider)
 

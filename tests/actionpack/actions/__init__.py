@@ -1,9 +1,23 @@
+from contextlib import contextmanager
+from io import IOBase as Buffer
 from requests import Response
 from time import sleep
 
 from actionpack import Action
 from actionpack.action import Name
 from tests.actionpack import FakeFile
+
+
+@contextmanager
+def uncloseable(buffer: Buffer):
+    """
+    Context manager which turns the fd's close operation to no-op for the duration of the context.
+    """
+    close = buffer.close
+    buffer.close = lambda: None
+    yield buffer
+    buffer.close = close
+    buffer.seek(0)  # fake close
 
 
 class FakeResponse(Response):

@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-from re import finditer
 from typing import Union
 
 from actionpack import Action
@@ -17,7 +16,6 @@ class Remove(Action[Name, FileContents]):
         self.tail = tail
 
     def instruction(self) -> FileContents:
-        # (line.group(0) for line in finditer(r'\w.+', self.path.read_text()))
         with open(str(self.path), 'r+') as file:
             lines = file.readlines()
             to_remove = lines.pop(-1) if self.tail else lines.pop(0)
@@ -26,8 +24,6 @@ class Remove(Action[Name, FileContents]):
                 file.write(line)
             file.truncate()
         return to_remove
-        # return to_remove.decode('') if self.output_type is str else to_remove.encode()
-        # return self.path.read_bytes() if self.output_type is bytes else self.path.read_text()
 
     def validate(self) -> Remove[Name, FileContents]:
         if not self.path.exists():

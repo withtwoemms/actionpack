@@ -3,6 +3,7 @@ from actionpack.actions.pipeline import Pipeline
 from actionpack.actions.make_request import MakeRequest
 from actionpack.actions.read import Read
 from actionpack.actions.read_input import ReadInput
+from actionpack.actions.remove import Remove
 from actionpack.actions.retry_policy import RetryPolicy
 from actionpack.actions.serialization import Serialization
 from actionpack.actions.write import Write
@@ -14,6 +15,7 @@ __all__ = [
     'Pipeline',
     'Read',
     'ReadInput',
+    'Remove',
     'RetryPolicy',
     'Serialization',
     'Write',

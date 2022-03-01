@@ -17,10 +17,25 @@ class RemoveTest(TestCase):
     contents = 'some file contents.'
     separator = '\n'
     other_contents = f'{contents}{separator}'
+    head = 'head'
+    tail = 'tail'
+    head_and_tail = f'{head}{separator}{tail}'
 
     def test_instantiate_given_invalid_output_type(self):
         result = Remove('some-file.name', output_type=100).perform()
         self.assertIsInstance(result.value, TypeError)
+
+    @patch('builtins.open')
+    def test_can_handle_empty_files(self, mock_file):
+        with uncloseable(StringIO()) as buffer:
+            mock_file.return_value = buffer
+
+            action = Remove(__file__)
+            result = action.perform()
+
+            self.assertIsInstance(result, Result)
+            self.assertTrue(result.successful)
+            self.assertEqual(result.value, '')
 
     @patch('builtins.open')
     def test_can_Remove_string(self, mock_file):
@@ -38,6 +53,36 @@ class RemoveTest(TestCase):
         remaining_contents = buffer.read().split(self.separator)
         self.assertEqual(len(remaining_contents), num_repeats - 1)
         self.assertTrue(remaining == self.contents for remaining in remaining_contents)
+
+    @patch('builtins.open')
+    def test_can_Remove_string_from_file_head(self, mock_file):
+        with uncloseable(StringIO(self.head_and_tail)) as buffer:
+            mock_file.return_value = buffer
+
+            action = Remove(__file__)
+            result = action.perform()
+
+            self.assertIsInstance(result, Result)
+            self.assertTrue(result.successful)
+            self.assertEqual(result.value, self.head + self.separator)
+
+        remaining_contents = buffer.read().rstrip()
+        self.assertEqual(remaining_contents, self.tail)
+
+    @patch('builtins.open')
+    def test_can_Remove_string_from_file_tail(self, mock_file):
+        with uncloseable(StringIO(self.head_and_tail)) as buffer:
+            mock_file.return_value = buffer
+
+            action = Remove(__file__, tail=True)
+            result = action.perform()
+
+            self.assertIsInstance(result, Result)
+            self.assertTrue(result.successful)
+            self.assertEqual(result.value, self.tail)
+
+        remaining_contents = buffer.read().rstrip()
+        self.assertEqual(remaining_contents, self.head)
 
     @patch('builtins.open')
     def test_can_Remove_bytes(self, mock_file):

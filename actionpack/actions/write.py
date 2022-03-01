@@ -73,10 +73,10 @@ class Write(Action[Name, int]):
     def validate(self) -> Write[Name, int]:
         if self.overwrite and self.append:
             raise ValueError('Cannot overwrite and append simultaneously')
-        if self.path and self.path.exists() and not self.overwrite and not self.append:
-            raise FileExistsError(f'Cannot {str(self)} to {str(self.path)}')
         if self.path and self.path.is_dir():
             raise IsADirectoryError(str(self.path))
+        if self.path and self.path.exists() and not self.overwrite and not self.append:
+            raise FileExistsError(f'Cannot {str(self)} to {str(self.path)}')
         return self
 
     class STDOUT:

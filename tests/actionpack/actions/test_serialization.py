@@ -32,6 +32,16 @@ class SerializationTest(TestCase):
     def setUp(self):
         self.user = self.User(name="Skategoat", email="skate@goat.biz")
 
+    def test_validation_fails_without_data(self):
+        serialization = Serialization(schema=self.UserSchema())
+        with self.assertRaises(Serialization.NoDataGiven):
+            serialization.validate()
+
+    def test_validation_fails_without_schema(self):
+        serialization = Serialization(data=self.user)
+        with self.assertRaises(Serialization.NoSchemaGiven):
+            serialization.validate()
+
     def test_can_serialize_marshmallow(self):
         serialization = Serialization(self.UserSchema(), self.user)
         result = serialization.perform()

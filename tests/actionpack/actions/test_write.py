@@ -1,6 +1,10 @@
 import pickle
 
+from contextlib import redirect_stdout
+from contextlib import redirect_stderr
+from io import StringIO
 from os import getcwd as cwd
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -36,6 +40,39 @@ class WriteTest(TestCase):
         self.assertEqual(file.read(), self.salutation + self.question)
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, self.absfilepath)
+
+    def test_can_Write_to_STDOUT(self):
+        buffer = StringIO()
+        with redirect_stdout(buffer):
+            result = Write(Write.STDOUT, self.question).perform(should_raise=True)
+            buffer.seek(0)  # return to beginning of "file"
+
+        self.assertEqual(buffer.read(), self.question)
+        self.assertIsInstance(result, Result)
+        self.assertIsNone(result.value)
+
+    def test_can_Write_to_STDERR(self):
+        buffer = StringIO()
+        with redirect_stderr(buffer):
+            result = Write(Write.STDERR, self.question).perform(should_raise=True)
+            buffer.seek(0)  # return to beginning of "file"
+
+        self.assertEqual(buffer.read(), self.question)
+        self.assertIsInstance(result, Result)
+        self.assertIsNone(result.value)
+
+    def test_can_only_write_string_or_bytes(self):
+        with self.assertRaises(TypeError):
+            Write('some/file', to_write=1.0).perform(should_raise=True)
+
+    def test_cannot_Write_to_existing_file(self):
+        with self.assertRaises(FileExistsError):
+            Write(__file__, to_write='something').perform(should_raise=True)
+
+    def test_cannot_Write_to_directory(self):
+        write = Write(str(Path(__file__).parent), to_write='something')
+        with self.assertRaises(IsADirectoryError):
+            write.perform(should_raise=True)
 
     def test_Write_raises_when_given_an_Exception_to_write(self):
         exception = Exception('some error.')

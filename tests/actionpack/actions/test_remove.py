@@ -23,6 +23,18 @@ class RemoveTest(TestCase):
         self.assertIsInstance(result.value, TypeError)
 
     @patch('builtins.open')
+    def test_can_handle_empty_files(self, mock_file):
+        with uncloseable(StringIO()) as buffer:
+            mock_file.return_value = buffer
+
+            action = Remove(__file__)
+            result = action.perform()
+
+            self.assertIsInstance(result, Result)
+            self.assertTrue(result.successful)
+            self.assertEqual(result.value, '')
+
+    @patch('builtins.open')
     def test_can_Remove_string(self, mock_file):
         num_repeats = 5
         with uncloseable(StringIO((self.other_contents * num_repeats).rstrip())) as buffer:

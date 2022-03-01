@@ -18,12 +18,13 @@ class Remove(Action[Name, FileContents]):
     def instruction(self) -> FileContents:
         with open(str(self.path), 'r+') as file:
             lines = file.readlines()
-            to_remove = lines.pop(-1) if self.tail else lines.pop(0)
-            file.seek(0)
-            for line in lines:
-                file.write(line)
-            file.truncate()
-        return to_remove
+            if lines:
+                to_remove = lines.pop(-1) if self.tail else lines.pop(0)
+                file.seek(0)
+                for line in lines:
+                    file.write(line)
+                file.truncate()
+        return to_remove if lines else ''
 
     def validate(self) -> Remove[Name, FileContents]:
         if not self.path.exists():

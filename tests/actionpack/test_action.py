@@ -139,6 +139,43 @@ class ActionTest(TestCase):
         action.name = name2
         self.assertEqual(action.name, name2)
 
+    def test_Action_has_unimplemented_instruction(self):
+        Action().instruction()
+
+    def test_can_delete_Action_name(self):
+        action = FakeAction()
+        action_name = 'gone soon.'
+        action.set(name=action_name)
+        self.assertEqual(action.name, action_name)
+        del action.name
+
+    def test_Action_perform_fails_for_non_callable_instruction(self):
+        action = FakeAction(instruction_provider='nope.')
+        result = action.perform()
+        self.assertFalse(result.successful)
+        self.assertIsInstance(result.value, TypeError)
+
+    def test_can_compare_Actions(self):
+        fake_action = FakeAction()
+        self.assertTrue(fake_action == FakeAction())
+        with self.assertRaises(Action.NotComparable):
+            fake_action == '<fake_action>'
+
+    def test_Action_Construct_has_string_representation(self):
+        failed_action_instantiation = FakeAction(typecheck=True)
+        result = failed_action_instantiation.perform()
+        self.assertIsInstance(failed_action_instantiation, Action.Construct)
+        self.assertEqual(repr(failed_action_instantiation), f'<Action.Construct[{result.value.__class__.__name__}]>')
+
+    def test_DependencyCheck_fails_if_package_missing(self):
+        FakeAction.requirements = ('not-a-real-packing-never-will-be',)
+        with self.assertRaises(Action.DependencyCheck.PackageMissing):
+            FakeAction().check_dependencies(FakeAction)
+
+    def test_DependencyCheck_fails_if_requirement_absent(self):
+        with self.assertRaises(Action.DependencyCheck.WhichPackage):
+            Action.DependencyCheck(FakeAction)
+
 
 class ResultTest(TestCase):
 

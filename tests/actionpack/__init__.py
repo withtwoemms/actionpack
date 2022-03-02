@@ -12,6 +12,10 @@ class FakeAction(Action[Name, Outcome]):
 
     result = 'Performing Action.'
 
+    @staticmethod
+    def return_result():
+        return FakeAction.result
+
     def __init__(
         self,
         name: Name = None,
@@ -24,9 +28,7 @@ class FakeAction(Action[Name, Outcome]):
         self.name = name
         self.instruction_provider = instruction_provider
         self.state = {'this': 'state'}
-
-    def instruction(self) -> str:
-        return self.instruction_provider() if self.instruction_provider else self.result
+        setattr(self, 'instruction', instruction_provider if instruction_provider else FakeAction.return_result)
 
 
 class FakeFile:

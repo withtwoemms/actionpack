@@ -2,6 +2,7 @@ from os import getcwd as cwd
 from unittest import TestCase
 from unittest.mock import patch
 
+from actionpack import Action
 from actionpack.action import Result
 from actionpack.actions import Pipeline
 from actionpack.actions import ReadInput
@@ -14,6 +15,16 @@ from tests.actionpack import FakeFile
 
 
 class PipelineTest(TestCase):
+
+    def test_instantiation_fails_with_invalid_action_types(self):
+        pipeline = Pipeline(ReadInput('Which file?'), 'not an ActionType')
+        self.assertIsInstance(pipeline, Action.Construct)
+        self.assertIsInstance(pipeline.failure, TypeError)
+
+    def test_can_Pipeline_constitutes_iterator_over_Action_types(self):
+        action_types = [FakeAction] * 3
+        pipeline = Pipeline(FakeAction(), *action_types)
+        self.assertEqual(list(pipeline), action_types)
 
     @patch('pathlib.Path.open')
     @patch('pathlib.Path.exists')
@@ -70,6 +81,15 @@ class PipelineTest(TestCase):
         self.assertIsInstance(result, Result)
         self.assertIsInstance(result.value, FileNotFoundError)
         self.assertEqual(str(result.value), bad_filename)
+
+    def test_Pipeline_Fitting_defines_constructor_replacement(self):
+        self.assertIsNone(Pipeline.Fitting.init(FakeAction))
+
+    def test_Pipeline_Fitting_defines_instruction_replacement(self):
+        result = Pipeline.Fitting.instruction(Pipeline.Fitting(FakeAction()))
+        self.assertTrue(result.successful)
+        result = Pipeline.Fitting.instruction(Pipeline.Fitting(FakeAction(), reaction=FakeAction()))
+        self.assertTrue(result.successful)
 
     @patch('pathlib.Path.open')
     @patch('pathlib.Path.exists')

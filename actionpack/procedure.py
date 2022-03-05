@@ -25,13 +25,10 @@ class Procedure(Generic[Name, Outcome]):
     def validate(self):
         actions, spare = tee(self.__actions, 2)
         self.__actions = spare
-        try:
-            for action in actions:
-                if not isinstance(action, Action):
-                    msg = f'Procedures can only execute Actions: {str(action)}'
-                    raise Procedure.NotAnAction(msg)
-        except Exception as e:
-            raise e
+        for action in actions:
+            if not isinstance(action, Action):
+                msg = f'Procedures can only execute Actions: {str(action)}'
+                raise Procedure.NotAnAction(msg)
 
     def execute(
         self,
@@ -49,6 +46,7 @@ class Procedure(Generic[Name, Outcome]):
                 futures = {executor.submit(action._perform, should_raise=should_raise): str(action) for action in actions}
                 for future in as_completed(futures):
                     yield future.result()
+        return True
 
     def __repr__(self):
         actions, spare = tee(self.actions, 2)

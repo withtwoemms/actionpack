@@ -58,11 +58,12 @@ class Procedure(Generic[Name, Outcome]):
             more_actions = True
         except StopIteration:
             more_actions = False
-        header = f'\nProcedure for performing the following Actions:\n'
+        header = '\nProcedure for performing the following Actions:\n'
         tab = '  '
         bullet = f'{tab}* '
         action_list = reduce(lambda a, b: str(a) + f'\n{bullet}' + str(b), some_actions)
-        return header + bullet + str(action_list) + f'\n{tab}...\n' if more_actions else ''
+        footer = f'\n{tab}...\n' if more_actions else ''
+        return header + bullet + str(action_list) + footer
 
     def __iter__(self):
         return self._actions

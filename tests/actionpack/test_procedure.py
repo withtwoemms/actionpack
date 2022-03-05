@@ -29,6 +29,11 @@ class ProcedureTest(TestCase):
     def setUp(self):
         self.procedure = Procedure((success, failure))
 
+    def test_cannot_instantiate_without_Actions(self):
+        with self.assertRaises(TypeError):
+            Procedure(actions=FakeAction())
+            Procedure(actions=None)
+
     def test_Procedure_is_Iterable_of_Actions(self):
         assertIsIterable(self.procedure)
         self.assertIsInstance(next(self.procedure), FakeAction)
@@ -51,6 +56,7 @@ class ProcedureTest(TestCase):
             next(results)
 
     def test_can_validate_Procedure(self):
+        self.procedure.validate()
         with self.assertRaises(Procedure.NotAnAction):
             Procedure(('wut.', failure)).validate()
 

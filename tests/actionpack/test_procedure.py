@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from textwrap import dedent
 from unittest import TestCase
 
 from actionpack import KeyedProcedure
@@ -59,6 +60,39 @@ class ProcedureTest(TestCase):
         self.procedure.validate()
         with self.assertRaises(Procedure.NotAnAction):
             Procedure(('wut.', failure)).validate()
+
+    def test_Procedure_can_handle_being_given_no_Actions(self):
+        empty_sync_results = list(Procedure(actions=list()).execute(synchronously=True))
+        self.assertFalse(empty_sync_results)
+        empty_async_results = list(Procedure(actions=list()).execute(synchronously=False))
+        self.assertFalse(empty_async_results)
+
+    def test_Procedure_has_readable_representation(self):
+        expected_short_result = dedent("""
+        Procedure for performing the following Actions:
+          * <FakeAction|name="success">
+          * <FakeAction|name="failure">""")
+        self.assertEqual(repr(self.procedure), expected_short_result)
+        procedure = Procedure([success] * 5)
+        expected_result = dedent("""
+        Procedure for performing the following Actions:
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">""")
+        self.assertEqual(repr(procedure), expected_result)
+        longer_procedure = Procedure([success] * 6)
+        expected_long_result = dedent("""
+        Procedure for performing the following Actions:
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          * <FakeAction|name="success">
+          ...
+        """)
+        self.assertEqual(repr(longer_procedure), expected_long_result)
 
     def test_can_execute_Procedure_asynchronously(self):
         file = FakeFile()

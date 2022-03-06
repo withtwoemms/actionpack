@@ -116,6 +116,17 @@ class ProcedureTest(TestCase):
 
 class KeyedProcedureTest(TestCase):
 
+    def test_cannot_instantiate_without_Actions(self):
+        with self.assertRaises(TypeError):
+            KeyedProcedure(actions=FakeAction())
+            KeyedProcedure(actions=None)
+
+    def test_can_handle_being_given_no_Actions(self):
+        empty_sync_results = list(KeyedProcedure(actions=list()).execute(synchronously=True))
+        self.assertFalse(empty_sync_results)
+        empty_async_results = list(KeyedProcedure(actions=list()).execute(synchronously=False))
+        self.assertFalse(empty_async_results)
+
     def test_can_create_KeyedProcedure(self):
         results = KeyedProcedure[str, str]((success, failure)).execute()
         results_dict = dict(results)
@@ -129,6 +140,14 @@ class KeyedProcedureTest(TestCase):
         self.assertIsInstance(next(results), tuple)
         with self.assertRaises(Exception):
             next(results)
+
+    def test_can_execute_asynchronously(self):
+        results = KeyedProcedure((success, failure)).execute(synchronously=False)
+
+        assertIsIterable(results)
+        results = dict(results)
+        self.assertIn('success', results.keys())
+        self.assertIn('failure', results.keys())
 
     def test_can_create_KeyedProcedure_from_Actions_named_using_any_scriptable_type(self):
         action1 = FakeAction[int, str]()
@@ -153,3 +172,6 @@ class KeyedProcedureTest(TestCase):
     def test_can_validate_KeyedProcedure(self):
         with self.assertRaises(KeyedProcedure.UnnamedAction):
             KeyedProcedure((FakeAction(), failure)).validate()
+        with self.assertRaises(KeyedProcedure.NotAnAction):
+            KeyedProcedure[str, str]((success, 'not an action',)).validate()
+        self.assertFalse(list(KeyedProcedure(actions=list()).validate()))

@@ -29,6 +29,7 @@ class Procedure(Generic[Name, Outcome]):
             if not isinstance(action, Action):
                 msg = f'Procedures can only execute Actions: {str(action)}'
                 raise Procedure.NotAnAction(msg)
+        return self
 
     def execute(
         self,
@@ -93,6 +94,7 @@ class KeyedProcedure(Procedure[Name, Outcome]):
             if action.name is None:
                 msg = f'All {self.__class__.__name__} Actions must have a name: {str(action)}'
                 raise KeyedProcedure.UnnamedAction(msg)
+        return self
 
     def execute(
         self,

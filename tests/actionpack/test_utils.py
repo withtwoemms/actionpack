@@ -2,6 +2,8 @@ from datetime import datetime
 from unittest import TestCase
 
 from actionpack.utils import Closure
+from actionpack.utils import first
+from actionpack.utils import last
 from actionpack.utils import microsecond_timestamp
 from actionpack.utils import pickleable
 from actionpack.utils import tally
@@ -64,6 +66,13 @@ class UtilsTest(TestCase):
         epoch = datetime(1970, 1, 1, 0, 0)  # 0 seconds since Epoch
         self.assertEqual(microsecond_timestamp(lambda: epoch), 0)
 
+    def test_first(self):
+        letters = list('abc')
+        self.assertEqual(first(letters), 'a')
+
+    def test_last(self):
+        letters = list('abc')
+        self.assertEqual(last(letters), 'c')
 
 
 class CanPickleMe:

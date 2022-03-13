@@ -1,11 +1,9 @@
-# actionpack
+<img src="https://user-images.githubusercontent.com/7152453/158044431-7a6515f1-3eef-4d8e-a549-69453d61088a.png" align="left" width="450" />
+
+<!-- # actionpack -->
+[![tests](https://github.com/withtwoemms/actionpack/workflows/tests/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Atests) [![codecov](https://codecov.io/gh/withtwoemms/actionpack/branch/main/graph/badge.svg?token=27Z4W0COFH)](https://codecov.io/gh/withtwoemms/actionpack) [![publish](https://github.com/withtwoemms/actionpack/workflows/publish/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Apublish) [![PyPI version](https://badge.fury.io/py/actionpack.svg)](https://badge.fury.io/py/actionpack)
 
 > a lib for describing Actions and how they should be performed
-
-[![tests](https://github.com/withtwoemms/actionpack/workflows/tests/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Atests)
-[![codecov](https://codecov.io/gh/withtwoemms/actionpack/branch/main/graph/badge.svg?token=27Z4W0COFH)](https://codecov.io/gh/withtwoemms/actionpack)
-[![publish](https://github.com/withtwoemms/actionpack/workflows/publish/badge.svg)](https://github.com/withtwoemms/actionpack/actions?query=workflow%3Apublish)
-[![PyPI version](https://badge.fury.io/py/actionpack.svg)](https://badge.fury.io/py/actionpack)
 
 # Overview
 

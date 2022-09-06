@@ -79,6 +79,21 @@ class RetryPolicyTest(TestCase):
             self.assertFalse(attempt.successful)
         self.assertListEqual([attempt.value for attempt in action.attempts], exceptions)
 
+    @patch('requests.Session.send')
+    def test_can_record_retry_history_if_successful(self, mock_session_send):
+        results = ['SUCCEEDED!']
+        mock_session_send.side_effect = results
+        action = RetryPolicy(
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=self.max_retries,
+            should_record=True
+        )
+        action.perform()
+
+        for attempt in action.attempts:
+            self.assertTrue(attempt.successful)
+        self.assertListEqual([attempt.value for attempt in action.attempts], results)
+
     def test_can_serialize(self):
         self.assertEqual(repr(self.action), '<RetryPolicy(2 x <MakeRequest>)>')
 

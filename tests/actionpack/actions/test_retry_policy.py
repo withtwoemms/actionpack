@@ -14,7 +14,10 @@ class RetryPolicyTest(TestCase):
 
     def setUp(self):
         self.max_retries = 2
-        self.action = RetryPolicy(MakeRequest('GET', 'http://localhost'), max_retries=self.max_retries)
+        self.action = RetryPolicy[str, str](
+            MakeRequest('GET', 'http://localhost'),
+            max_retries=self.max_retries
+        )
 
     @patch('requests.Session.send')
     def test_RetryPolicy_not_enacted_on_initial_success(self, mock_session_send):
@@ -65,10 +68,10 @@ class RetryPolicyTest(TestCase):
         self.assertEqual(validated_action.retries, invalid_num_retries)
 
     @patch('requests.Session.send')
-    def test_can_record_retry_history(self, mock_session_send):
+    def test_can_record_retry_history_if_not_successful(self, mock_session_send):
         exceptions = [Exception('something went wrong :/')] * (self.max_retries + 1)
         mock_session_send.side_effect = exceptions
-        action = RetryPolicy(
+        action = RetryPolicy[str, str](
             action=MakeRequest('GET', 'http://localhost'),
             max_retries=self.max_retries,
             should_record=True
@@ -78,6 +81,21 @@ class RetryPolicyTest(TestCase):
         for attempt in action.attempts:
             self.assertFalse(attempt.successful)
         self.assertListEqual([attempt.value for attempt in action.attempts], exceptions)
+
+    @patch('requests.Session.send')
+    def test_can_record_retry_history_if_successful(self, mock_session_send):
+        results = ['SUCCEEDED!']
+        mock_session_send.side_effect = results
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=self.max_retries,
+            should_record=True
+        )
+        action.perform()
+
+        for attempt in action.attempts:
+            self.assertTrue(attempt.successful)
+        self.assertListEqual([attempt.value for attempt in action.attempts], results)
 
     def test_can_serialize(self):
         self.assertEqual(repr(self.action), '<RetryPolicy(2 x <MakeRequest>)>')

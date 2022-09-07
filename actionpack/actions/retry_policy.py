@@ -3,6 +3,7 @@ from string import Template
 from time import sleep
 
 from actionpack import Action
+from actionpack.action import Result
 from actionpack.action import Name
 from actionpack.action import Outcome
 from actionpack.utils import tally
@@ -22,7 +23,7 @@ class RetryPolicy(Action[Name, Outcome]):
         self.should_record = should_record
 
         if self.should_record:
-            self.attempts = []
+            self.attempts: list[Result[Outcome]] = []
 
     def instruction(self) -> Outcome:
         return self.enact(self.delay_between_attempts)
@@ -38,10 +39,10 @@ class RetryPolicy(Action[Name, Outcome]):
 
     def enact(self, with_delay: int = 0, counter: int = 0) -> Outcome:
         initial_attempt = self.action.perform()
+        if self.should_record:
+            self.attempts.append(initial_attempt)
         if initial_attempt.successful:
             return initial_attempt.value
-        elif self.should_record:
-            self.attempts.append(initial_attempt)
 
         for _tally in tally(self.max_retries):
             sleep(with_delay)

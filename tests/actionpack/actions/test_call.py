@@ -25,6 +25,14 @@ class CallTest(TestCase):
         self.assertIsInstance(result, Result)
         self.assertEqual(result.value, ((self.arg,), {self.kwarg: self.kwarg}))
 
+    def test_Call_instantiation_accepts_only_Closure_objects(self):
+        result = Call('not a closure').perform()
+        self.assertFalse(result.successful)
+        self.assertIsInstance(result.value, TypeError)
+
+    def test_serializes_as_expected(self):
+        self.assertEqual(repr(self.action), '<Call(function)>')
+
     def test_can_pickle(self):
         pickled = pickleable(self.action)
         unpickled = pickle.loads(pickled)

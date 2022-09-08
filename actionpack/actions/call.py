@@ -10,3 +10,6 @@ class Call(Action[Name, Outcome]):
 
     def instruction(self) -> Outcome:
         return self.closure()
+
+    def __repr__(self):
+        return f'<Call({self.closure.func.__name__})>'

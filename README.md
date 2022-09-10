@@ -22,6 +22,18 @@ Keeping track of external system state is just impractical, but declaring intent
 >>> action = Read('path/to/some/file')
 ```
 
+The `action`, above, represents the intent to `Read` the contents from the file at some path.
+An `Action` can be "performed" and the result is captured by a `Result` object:
+
+```python
+>>> result = action.perform()  # produces a Result object
+```
+
+The `result` holds disposition information about the outcome of the `action`.
+That includes information like _whether or not it was `.successful`_ or that it was _`.produced_at` some unix timestamp_ (microseconds by default).
+To gain access to the value of the `result`, check the `.value` attribute.
+If unsuccessful, there will be an `Exception`, otherwise there will be an instance of some non-`Exception` type.
+
 ### _Can Actions be connected?_
 
 A `Result` can be produced by performing an `Action` and that value can be percolated through a collection of `ActionTypes` using the `Pipeline` abstraction:

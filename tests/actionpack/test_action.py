@@ -183,6 +183,15 @@ class ResultTest(TestCase):
         with self.assertRaises(Result.OutcomeMustBeOfTypeEither):
             Result('not an Either type')
 
+    def test_cannot_change_immutable_attributes(self):
+        result = Result(Right('correct.'))
+        with self.assertRaises(AttributeError):
+            result.produced_at = 123
+        with self.assertRaises(AttributeError):
+            result.successful = False
+        with self.assertRaises(AttributeError):
+            result.value = 'some other value'
+
     def test_can_serialize_result(self):
         successful_outcome = 'correct.'
         successful_result = Result(Right(successful_outcome))

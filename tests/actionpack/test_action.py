@@ -192,6 +192,9 @@ class ResultTest(TestCase):
         with self.assertRaises(AttributeError):
             result.value = 'some other value'
 
+        result.who_cares = 'right?'
+        del result.who_cares  # should not raise since not declared immutable
+
     def test_can_serialize_result(self):
         successful_outcome = 'correct.'
         successful_result = Result(Right(successful_outcome))
@@ -204,9 +207,3 @@ class ResultTest(TestCase):
         confused_result = Result(Left(successful_outcome))
         self.assertFalse(confused_result.successful)
 
-    def test_Result_successful_attribute_is_immutable(self):
-        result = Result(Right('correct.'))
-        with self.assertRaises(AttributeError):
-            del result.successful
-        result.who_cares = 'right?'
-        del result.who_cares  # should not raise since not declared immutable

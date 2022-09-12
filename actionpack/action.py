@@ -27,7 +27,7 @@ V = TypeVar('V')
 
 class Result(Generic[Outcome]):
 
-    _immutables = ('successful',)
+    _immutables = ('successful', 'produced_at', 'value',)
 
     def __init__(
         self,

@@ -30,6 +30,16 @@ class CallTest(TestCase):
         self.assertFalse(result.successful)
         self.assertIsInstance(result.value, TypeError)
 
+    def test_Call_can_handle_Closures_with_iterator_args(self):
+        iterable = [1, 1, 1]
+        closure = Closure(sum, iter(iterable))
+        call = Call(closure)
+        result = call.perform()
+        new_result = call.perform()
+        self.assertTrue(result.successful)
+        self.assertEqual(sum(iterable), result.value)
+        self.assertEqual(0, new_result.value)  # since iterable exhausted
+
     def test_serializes_as_expected(self):
         self.assertEqual(repr(self.action), '<Call(function)>')
 

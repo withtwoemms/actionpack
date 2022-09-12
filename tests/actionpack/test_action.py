@@ -192,6 +192,17 @@ class ResultTest(TestCase):
         with self.assertRaises(AttributeError):
             result.value = 'some other value'
 
+        result.who_cares = 'right?'  # should not raise since not declared immutable
+
+    def test_cannot_delete_immutable_attributes(self):
+        result = Result(Right('correct.'))
+        with self.assertRaises(AttributeError):
+            del result.produced_at
+        with self.assertRaises(AttributeError):
+            del result.successful
+        with self.assertRaises(AttributeError):
+            del result.value
+
         result.who_cares = 'right?'
         del result.who_cares  # should not raise since not declared immutable
 

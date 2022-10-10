@@ -87,7 +87,7 @@ class ActionType(type):
         return instance
 
 
-def partialaction(name, parent: ActionType, **kwargs):
+def partialaction(name, parent: ActionType, **kwargs) -> ActionType:
     partial__init__ = partialmethod(parent.__init__, **kwargs)
     return type(name, (parent,), {'__init__': partial__init__})
 

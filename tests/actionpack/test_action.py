@@ -83,24 +83,6 @@ class ActionTest(TestCase):
         self.assertFalse(result.successful)
         self.assertIn(contents, vessel)
 
-    def test_Result_success_is_immutable(self):
-        success = FakeAction().perform()
-        failure = FakeAction(instruction_provider=self.raise_failure).perform()
-
-        with self.assertRaises(AttributeError):
-            success.successful = 'nah.'
-
-        with self.assertRaises(AttributeError):
-            failure.successful = 'maybe?'
-
-    def test_Result_has_timestamp(self):
-        result = FakeAction(instruction_provider=lambda: 'succeeded').perform(
-            timestamp_provider=lambda: 0
-        )
-
-        self.assertTrue(result.successful)
-        self.assertEqual(result.produced_at, 0)
-
     def test_Action_Construct(self):
         construct = FakeAction(typecheck='Action instantiation fails.')
         result = construct.perform()
@@ -190,6 +172,27 @@ class ActionTest(TestCase):
 
 class ResultTest(TestCase):
 
+    def raise_failure(self):
+        raise self.exception
+
+    def test_Result_success_is_immutable(self):
+        success = FakeAction().perform()
+        failure = FakeAction(instruction_provider=self.raise_failure).perform()
+
+        with self.assertRaises(AttributeError):
+            success.successful = 'nah.'
+
+        with self.assertRaises(AttributeError):
+            failure.successful = 'maybe?'
+
+    def test_Result_has_timestamp(self):
+        result = FakeAction(instruction_provider=lambda: 'succeeded').perform(
+            timestamp_provider=lambda: 0
+        )
+
+        self.assertTrue(result.successful)
+        self.assertEqual(result.produced_at, 0)
+
     def test_cannot_instantiate_without_Either(self):
         with self.assertRaises(Result.OutcomeMustBeOfTypeEither):
             Result('not an Either type')
@@ -228,4 +231,3 @@ class ResultTest(TestCase):
 
         confused_result = Result(Left(successful_outcome))
         self.assertFalse(confused_result.successful)
-

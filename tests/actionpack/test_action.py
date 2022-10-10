@@ -48,14 +48,16 @@ class ActionTest(TestCase):
             FakeAction(instruction_provider=self.raise_failure).perform(should_raise=True)
 
     def test_can_create_partial_Action(self):
+        def instruction_provider():
+            return some_result_value
+
         some_result_value = 'success!'
-        instruction_provider = lambda: some_result_value
-        FakeActionWithInstruction = partialaction(
+        PartialAction = partialaction(
             'FakeActionWithInstruction',
             FakeAction,
             instruction_provider=instruction_provider
         )
-        self.assertEqual(FakeActionWithInstruction().perform().value, some_result_value)
+        self.assertEqual(PartialAction().perform().value, some_result_value)
 
     def test_can_determine_if_Result_was_successful(self):
         success = FakeAction().perform()

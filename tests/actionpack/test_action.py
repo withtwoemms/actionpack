@@ -48,14 +48,16 @@ class ActionTest(TestCase):
             FakeAction(instruction_provider=self.raise_failure).perform(should_raise=True)
 
     def test_can_create_partial_Action(self):
+        def instruction_provider():
+            return some_result_value
+
         some_result_value = 'success!'
-        instruction_provider = lambda: some_result_value
-        FakeActionWithInstruction = partialaction(
+        PartialAction = partialaction(
             'FakeActionWithInstruction',
             FakeAction,
             instruction_provider=instruction_provider
         )
-        self.assertEqual(FakeActionWithInstruction().perform().value, some_result_value)
+        self.assertEqual(PartialAction().perform().value, some_result_value)
 
     def test_can_determine_if_Result_was_successful(self):
         success = FakeAction().perform()
@@ -82,24 +84,6 @@ class ActionTest(TestCase):
 
         self.assertFalse(result.successful)
         self.assertIn(contents, vessel)
-
-    def test_Result_success_is_immutable(self):
-        success = FakeAction().perform()
-        failure = FakeAction(instruction_provider=self.raise_failure).perform()
-
-        with self.assertRaises(AttributeError):
-            success.successful = 'nah.'
-
-        with self.assertRaises(AttributeError):
-            failure.successful = 'maybe?'
-
-    def test_Result_has_timestamp(self):
-        result = FakeAction(instruction_provider=lambda: 'succeeded').perform(
-            timestamp_provider=lambda: 0
-        )
-
-        self.assertTrue(result.successful)
-        self.assertEqual(result.produced_at, 0)
 
     def test_Action_Construct(self):
         construct = FakeAction(typecheck='Action instantiation fails.')
@@ -178,6 +162,15 @@ class ActionTest(TestCase):
         self.assertIsInstance(failed_action_instantiation, Action.Construct)
         self.assertEqual(repr(failed_action_instantiation), f'<Action.Construct[{result.value.__class__.__name__}]>')
 
+    def test_partial_Action_has_string_representation(self):
+        partial_action_name = 'FakeActionWithInstruction'
+        PartialAction = partialaction(
+            partial_action_name,
+            FakeAction,
+            instruction_provider=lambda: 'success!'
+        )
+        self.assertEqual(repr(PartialAction()), f'<{partial_action_name}>')
+
     def test_DependencyCheck_fails_if_package_missing(self):
         FakeAction.requirements = ('not-a-real-packing-never-will-be',)
         with self.assertRaises(Action.DependencyCheck.PackageMissing):
@@ -189,6 +182,27 @@ class ActionTest(TestCase):
 
 
 class ResultTest(TestCase):
+
+    def raise_failure(self):
+        raise self.exception
+
+    def test_Result_success_is_immutable(self):
+        success = FakeAction().perform()
+        failure = FakeAction(instruction_provider=self.raise_failure).perform()
+
+        with self.assertRaises(AttributeError):
+            success.successful = 'nah.'
+
+        with self.assertRaises(AttributeError):
+            failure.successful = 'maybe?'
+
+    def test_Result_has_timestamp(self):
+        result = FakeAction(instruction_provider=lambda: 'succeeded').perform(
+            timestamp_provider=lambda: 0
+        )
+
+        self.assertTrue(result.successful)
+        self.assertEqual(result.produced_at, 0)
 
     def test_cannot_instantiate_without_Either(self):
         with self.assertRaises(Result.OutcomeMustBeOfTypeEither):
@@ -228,4 +242,3 @@ class ResultTest(TestCase):
 
         confused_result = Result(Left(successful_outcome))
         self.assertFalse(confused_result.successful)
-

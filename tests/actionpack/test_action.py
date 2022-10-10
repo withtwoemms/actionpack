@@ -7,6 +7,7 @@ from threading import Thread
 from unittest import TestCase
 
 from actionpack import Action
+from actionpack import partialaction
 from actionpack.action import Result
 from actionpack.utils import pickleable
 from tests.actionpack import FakeAction
@@ -45,6 +46,16 @@ class ActionTest(TestCase):
     def test_Action_can_raise_exception(self):
         with self.assertRaises(type(self.exception)):
             FakeAction(instruction_provider=self.raise_failure).perform(should_raise=True)
+
+    def test_can_create_partial_Action(self):
+        some_result_value = 'success!'
+        instruction_provider = lambda: some_result_value
+        FakeActionWithInstruction = partialaction(
+            'FakeActionWithInstruction',
+            FakeAction,
+            instruction_provider=instruction_provider
+        )
+        self.assertEqual(FakeActionWithInstruction().perform().value, some_result_value)
 
     def test_can_determine_if_Result_was_successful(self):
         success = FakeAction().perform()

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import partialmethod
 from oslash import Left
 from oslash import Right
 from oslash.either import Either
@@ -84,6 +85,11 @@ class ActionType(type):
                 setattr(instance, 'instruction', instruction)
 
         return instance
+
+
+def partialaction(name, parent: ActionType, **kwargs):
+    partial__init__ = partialmethod(parent.__init__, **kwargs)
+    return type(name, (parent,), {'__init__': partial__init__})
 
 
 class Action(Generic[Name, Outcome], metaclass=ActionType):

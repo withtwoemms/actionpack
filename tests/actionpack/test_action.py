@@ -162,6 +162,15 @@ class ActionTest(TestCase):
         self.assertIsInstance(failed_action_instantiation, Action.Construct)
         self.assertEqual(repr(failed_action_instantiation), f'<Action.Construct[{result.value.__class__.__name__}]>')
 
+    def test_partial_Action_has_string_representation(self):
+        partial_action_name = 'FakeActionWithInstruction'
+        PartialAction = partialaction(
+            partial_action_name,
+            FakeAction,
+            instruction_provider=lambda: 'success!'
+        )
+        self.assertEqual(repr(PartialAction()), f'<{partial_action_name}>')
+
     def test_DependencyCheck_fails_if_package_missing(self):
         FakeAction.requirements = ('not-a-real-packing-never-will-be',)
         with self.assertRaises(Action.DependencyCheck.PackageMissing):

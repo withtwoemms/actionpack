@@ -37,22 +37,16 @@ class RetryPolicy(Action[Name, Outcome]):
         finally:
             return self
 
-    def enact(self, with_delay: int = 0, counter: int = 0) -> Outcome:
-        initial_attempt = self.action.perform()
-        if self.should_record:
-            self.attempts.append(initial_attempt)
-        if initial_attempt.successful:
-            return initial_attempt.value
-
-        for _tally in tally(self.max_retries):
+    def enact(self, with_delay: int = 0, counter: int = -1) -> Outcome:
+        for _tally in tally(1 + self.max_retries):
             sleep(with_delay)
             counter += _tally
             self.retries = counter
             retry = self.action.perform()
+            if self.should_record:
+                self.attempts.append(retry)
             if retry.successful:
                 return retry.value
-            elif self.should_record:
-                self.attempts.append(retry)
 
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 

@@ -85,5 +85,4 @@ def swap(lst: List, idx1: int, idx2: int) -> List:
 
 def microsecond_timestamp(clock: Callable[[], datetime] = datetime.utcnow) -> int:
     now = clock()
-    return  int(timegm(now.timetuple()) * 1e6 + now.microsecond)
-
+    return int(timegm(now.timetuple()) * 1e6 + now.microsecond)

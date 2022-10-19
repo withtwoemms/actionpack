@@ -47,6 +47,9 @@ class RetryPolicy(Action[Name, Outcome]):
         return False
 
     def enact(self, with_delay: int = 0, counter: int = -1) -> Outcome:
+        if not isinstance(counter, int) or counter < -1:
+            raise self.Invalid(f'Cannot proceed with given `counter` param value: {counter}.')
+
         for _tally in tally(1 + self.max_retries):
             attempt = self.action.perform()
             counter += _tally

@@ -2,6 +2,7 @@ import pickle
 
 from datetime import datetime
 from unittest import TestCase
+from unittest.mock import ANY
 from unittest.mock import patch
 
 from actionpack.action import Result
@@ -20,9 +21,8 @@ class RetryPolicyTest(TestCase):
             max_retries=self.max_retries
         )
 
-    # TODO (manualautomaton) -- reassess
     @patch('requests.Session.send')
-    def test_RetryPolicy_not_enacted_on_initial_success(self, mock_session_send):
+    def test_RetryPolicy_can_succeed(self, mock_session_send):
         result = self.action.perform()
 
         self.assertIsInstance(result, Result)
@@ -38,14 +38,32 @@ class RetryPolicyTest(TestCase):
         self.assertIsInstance(result.value, RetryPolicy.Expired)
 
     @patch('requests.Session.send')
-    def test_can_validate_RetryPolicy(self, mock_session_send):
+    def test_can_handle_inappropriately_enacted_RetryPolicy(self, mock_session_send):
+        mock_session_send.side_effect = Exception('something went wrong :/')
+        with self.assertRaises(RetryPolicy.Invalid):
+            self.action.enact(counter=-10)
+
+    @patch('requests.Session.send')
+    def test_can_validate_expired_RetryPolicy(self, mock_session_send):
         exceptions = [Exception('something went wrong :/')] * self.max_retries
         mock_session_send.side_effect = exceptions
         result = self.action.perform()
-        validated_action = self.action.validate()
 
         self.assertIsInstance(result.value, RetryPolicy.Expired)
-        self.assertEqual(validated_action.retries, self.max_retries)
+        with self.assertRaises(RetryPolicy.Expired):
+            self.action.validate()
+
+    @patch('requests.Session.send')
+    @patch('actionpack.actions.RetryPolicy.enacted')
+    def test_can_validate_enacted_RetryPolicy(self, mock_validation, mock_session_send):
+        exceptions = [Exception('something went wrong :/'), ANY]
+        mock_session_send.side_effect = exceptions
+        mock_validation.side_effect = [ANY, RetryPolicy.Enacted('already started.')]
+        result = self.action.perform()
+
+        self.assertIsInstance(result.value, RetryPolicy.Enacted)
+        with self.assertRaises(RetryPolicy.Enacted):
+            self.action.validate()
 
     @patch('requests.Session.send')
     def test_can_enact_RetryPolicy_that_ultimately_succeeds(self, mock_session_send):
@@ -64,7 +82,7 @@ class RetryPolicyTest(TestCase):
 
     def test_validate(self):
         invalid_num_retries = -1
-        self.action.retries = invalid_num_retries
+        self.action._retries = invalid_num_retries
         validated_action = self.action.validate()
 
         self.assertEqual(validated_action.retries, invalid_num_retries)

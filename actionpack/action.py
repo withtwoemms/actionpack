@@ -178,6 +178,9 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
     class NotComparable(Exception):
         pass
 
+    class Invalid(Exception):
+        pass
+
     class Construct:
         def __init__(self, failure: Exception):
             self.failure = failure

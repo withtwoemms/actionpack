@@ -29,19 +29,38 @@ class RetryPolicy(Action[Name, Outcome]):
         return self.enact(self.delay_between_attempts)
 
     def validate(self) -> RetryPolicy:
+        if self.expired:
+            raise RetryPolicy.Expired(f'Gave up on {str(self.action)} after {self.max_retries + 1} attempts.')
+        if self.enacted:
+            raise RetryPolicy.Enacted(f'{str(self.action)} already attempted. Will not perform.')
+        return self
+
+    @property
+    def retries(self) -> int:
         try:
-            if self.retries >= 0:
-                raise RetryPolicy.Expired(f'{str(self.action)} already attempted. Will not perform.')
+            return self._retries
         except AttributeError:
             pass
-        finally:
-            return self
+        return -1
+
+    @property
+    def enacted(self):
+        return self.retries >= 0
+
+    @property
+    def expired(self):
+        return self.retries >= self.max_retries
 
     def enact(self, with_delay: int = 0, counter: int = -1) -> Outcome:
+        if not isinstance(counter, int) or counter < -1:
+            raise self.Invalid(f'Cannot proceed with given `counter` param value: {counter}.')
+
         for _tally in tally(1 + self.max_retries):
+            if self.expired:
+                break  # pragma: no cover
             attempt = self.action.perform()
             counter += _tally
-            self.retries = counter
+            self._retries = counter
             if self.should_record:
                 self.attempts.append(attempt)
             if attempt.successful:
@@ -60,4 +79,7 @@ class RetryPolicy(Action[Name, Outcome]):
         )
 
     class Expired(Exception):
+        pass
+
+    class Enacted(Exception):
         pass

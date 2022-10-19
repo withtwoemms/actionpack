@@ -14,6 +14,7 @@ setup(
     use_scm_version={'local_scheme': 'no-local-version'} if envvars.get('LOCAL_VERSION_SCHEME') else True,
     packages=find_packages(exclude=['tests']),
     author='Emmanuel I. Obi',
+    license='MIT',
     maintainer='Emmanuel I. Obi',
     maintainer_email='withtwoemms@gmail.com',
     url='https://github.com/withtwoemms/actionpack',

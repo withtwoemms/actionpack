@@ -1,5 +1,6 @@
 import pickle
 
+from datetime import datetime
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -19,6 +20,7 @@ class RetryPolicyTest(TestCase):
             max_retries=self.max_retries
         )
 
+    # TODO (manualautomaton) -- reassess
     @patch('requests.Session.send')
     def test_RetryPolicy_not_enacted_on_initial_success(self, mock_session_send):
         result = self.action.perform()
@@ -96,6 +98,21 @@ class RetryPolicyTest(TestCase):
         for attempt in action.attempts:
             self.assertTrue(attempt.successful)
         self.assertListEqual([attempt.value for attempt in action.attempts], results)
+
+    @patch('requests.Session.send')
+    def test_delay_is_bypassed_after_expiration(self, mock_session_send):
+        results = ['SUCCEEDED!']
+        delay = 300  # seconds
+        mock_session_send.side_effect = results
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=0,
+            delay_between_attempts=delay,
+            should_record=True,
+        )
+        timestamp_provider = lambda: round(datetime.now().timestamp())
+        result = action.perform(timestamp_provider=timestamp_provider)
+        assert result.produced_at < timestamp_provider() + delay
 
     def test_can_serialize(self):
         self.assertEqual(repr(self.action), '<RetryPolicy(2 x <MakeRequest>)>')

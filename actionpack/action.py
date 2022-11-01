@@ -150,6 +150,7 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
                 if should_raise:
                     raise e
                 outcome = Left(e)
+            finally:
                 if self._ActionType__reaction:
                     self._ActionType__reaction.perform(should_raise=should_raise)
 

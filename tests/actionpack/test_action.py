@@ -5,6 +5,7 @@ from oslash import Left
 from oslash import Right
 from threading import Thread
 from unittest import TestCase
+from unittest.mock import patch
 
 from actionpack import Action
 from actionpack import partialaction
@@ -83,6 +84,31 @@ class ActionTest(TestCase):
         result = action.perform()
 
         self.assertFalse(result.successful)
+        self.assertIn(contents, vessel)
+
+    @patch('oslash.Left.__init__')
+    def test_can_react_to_failure_during_catastrophe(self, mock_wrapper):
+        def raise_another_failure(e):
+            raise e
+
+        mock_wrapper.side_effect = raise_another_failure
+
+        vessel = []
+        contents = 'contents'
+
+        def fill():
+            vessel.append(contents)
+
+        reaction = FakeAction(instruction_provider=fill)
+        action = FakeAction(
+            instruction_provider=self.raise_failure,
+            reaction=reaction
+        )
+
+        with self.assertRaises(Exception):
+            result = action.perform()
+            self.assertFalse(result.successful)
+
         self.assertIn(contents, vessel)
 
     def test_Action_Construct(self):

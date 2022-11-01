@@ -5,6 +5,7 @@ from unittest import TestCase
 from unittest.mock import ANY
 from unittest.mock import patch
 
+from actionpack import Action
 from actionpack.action import Result
 from actionpack.actions import MakeRequest
 from actionpack.actions import RetryPolicy
@@ -132,8 +133,21 @@ class RetryPolicyTest(TestCase):
         result = action.perform(timestamp_provider=timestamp_provider)
         assert result.produced_at < timestamp_provider() + delay
 
-    def test_can_serialize(self):
-        self.assertEqual(repr(self.action), '<RetryPolicy(2 x <MakeRequest>)>')
+    def test_instantiation_fails_given_invalid_max_retries(self):
+        action = RetryPolicy[str, str](action=MakeRequest('GET', 'http://localhost'), max_retries=-1)
+        self.assertIsInstance(action, Action.Construct)
+        result = action.perform()
+        self.assertFalse(result.successful)
+        self.assertIsInstance(result.value, RetryPolicy.Invalid)
+
+    @patch('requests.Session.send')
+    def test_can_serialize(self, mock_session_send):
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=0,
+        )
+        self.assertEqual(repr(action), '<RetryPolicy(1 x <MakeRequest>)>')
+        self.assertEqual(repr(self.action), '<RetryPolicy(3 x <MakeRequest>)>')
 
     @patch('requests.Session.send')
     def test_can_pickle(self, mock_session_send):

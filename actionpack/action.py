@@ -87,7 +87,7 @@ class ActionType(type):
         return instance
 
 
-def partialaction(name, parent: ActionType, **kwargs) -> ActionType:
+def partialaction(name, parent: T, **kwargs) -> T:
     partial__init__ = partialmethod(parent.__init__, **kwargs)
     return type(name, (parent,), {'__init__': partial__init__})
 
@@ -150,6 +150,7 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
                 if should_raise:
                     raise e
                 outcome = Left(e)
+            finally:
                 if self._ActionType__reaction:
                     self._ActionType__reaction.perform(should_raise=should_raise)
 

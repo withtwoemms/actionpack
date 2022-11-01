@@ -17,6 +17,9 @@ class RetryPolicy(Action[Name, Outcome]):
         delay_between_attempts: int = 0,
         should_record: bool = False
     ):
+        if not isinstance(max_retries, int) or max_retries < 0:
+            raise self.Invalid(f'The number of max_retries must be greater than zero. Given max_retries={max_retries}.')
+
         self.action = action
         self.max_retries = max_retries
         self.delay_between_attempts = delay_between_attempts
@@ -70,10 +73,10 @@ class RetryPolicy(Action[Name, Outcome]):
         raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
 
     def __repr__(self):
-        tmpl = Template('<$class_name($max_retries x $action_name$delay)>')
+        tmpl = Template('<$class_name($total_attempts x $action_name$delay)>')
         return tmpl.substitute(
             class_name=self.__class__.__name__,
-            max_retries=self.max_retries,
+            total_attempts=self.max_retries + 1,
             action_name=str(self.action),
             delay='' if not self.delay_between_attempts else f' | {self.delay_between_attempts}s delay'
         )

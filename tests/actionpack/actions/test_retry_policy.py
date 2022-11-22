@@ -24,7 +24,7 @@ class RetryPolicyTest(TestCase):
 
     @patch('requests.Session.send')
     def test_RetryPolicy_can_succeed(self, mock_session_send):
-        result = self.action.perform()
+        result = self.action.perform(should_raise=True)
 
         self.assertIsInstance(result, Result)
         self.assertTrue(result.successful)
@@ -117,6 +117,64 @@ class RetryPolicyTest(TestCase):
         for attempt in action.attempts:
             self.assertTrue(attempt.successful)
         self.assertListEqual([attempt.value for attempt in action.attempts], results)
+
+    @patch('requests.Session.send')
+    def test_can_enact_with_linear_backoff(self, mock_session_send):
+        delay = 0.2  # seconds
+        delay_microseconds = delay * 1E6
+        mock_session_send.side_effect = [Exception('failed.')] * (self.max_retries + 1)
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=4,
+            delay_between_attempts=delay,
+            backoff='LINEAR',
+            should_record=True,
+        )
+        result = action.perform(timestamp_provider=lambda: round(datetime.now().timestamp()))
+        times = [
+            attempt.produced_at - action.attempts[i - 1].produced_at
+            for i, attempt in reversed(list(enumerate(action.attempts))) if i != 0
+        ]
+
+        self.assertFalse(result.successful)
+        expected_target_factors = [4.0, 3.0, 2.0, 1.0]  # linear sequence
+        actual_target_factors = []
+        for time in times:
+            fraction = time / delay_microseconds
+            target_factor = round(fraction) * delay_microseconds
+            actual_target_factors.append(target_factor // delay_microseconds)
+            actual_jitter_percentage = time / (target_factor * delay_microseconds)
+            self.assertLessEqual(actual_jitter_percentage, action.jitter_percentage)
+        self.assertListEqual(actual_target_factors, expected_target_factors)
+
+    @patch('requests.Session.send')
+    def test_can_enact_with_exponential_backoff(self, mock_session_send):
+        delay = 0.2  # seconds
+        delay_microseconds = delay * 1E6
+        mock_session_send.side_effect = [Exception('failed.')] * (self.max_retries + 1)
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=4,
+            delay_between_attempts=delay,
+            backoff='EXPONENTIAL',
+            should_record=True,
+        )
+        result = action.perform(timestamp_provider=lambda: round(datetime.now().timestamp()))
+        times = [
+            attempt.produced_at - action.attempts[i - 1].produced_at
+            for i, attempt in reversed(list(enumerate(action.attempts))) if i != 0
+        ]
+
+        self.assertFalse(result.successful)
+        expected_target_factors = [8.0, 4.0, 2.0, 1.0]  # exponential sequence
+        actual_target_factors = []
+        for time in times:
+            fraction = time / delay_microseconds
+            target_factor = round(fraction) * delay_microseconds
+            actual_target_factors.append(target_factor // delay_microseconds)
+            actual_jitter_percentage = time / (target_factor * delay_microseconds)
+            self.assertLessEqual(actual_jitter_percentage, action.jitter_percentage)
+        self.assertListEqual(actual_target_factors, expected_target_factors)
 
     @patch('requests.Session.send')
     def test_delay_is_bypassed_after_expiration(self, mock_session_send):

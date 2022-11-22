@@ -1,4 +1,9 @@
 from __future__ import annotations
+
+import math
+import random
+
+from enum import Enum
 from string import Template
 from time import sleep
 
@@ -15,21 +20,29 @@ class RetryPolicy(Action[Name, Outcome]):
         action: Action[Name, Outcome],
         max_retries: int,
         delay_between_attempts: int = 0,
+        max_delay: int = 3600,
+        backoff: str = 'CONSTANT',
+        jitter_percentage: float = 1.0,
         should_record: bool = False
     ):
         if not isinstance(max_retries, int) or max_retries < 0:
             raise self.Invalid(f'The number of max_retries must be greater than zero. Given max_retries={max_retries}.')
+        if jitter_percentage not in range(101):
+            raise self.Invalid(f'The number of max_retries must be greater than zero. Given max_retries={max_retries}.')
 
         self.action = action
-        self.max_retries = max_retries
+        self.backoff = RetryPolicy.Backoff(backoff)
         self.delay_between_attempts = delay_between_attempts
+        self.jitter_percentage = jitter_percentage
+        self.max_delay = max_delay
+        self.max_retries = max_retries
         self.should_record = should_record
 
         if self.should_record:
             self.attempts: list[Result[Outcome]] = []
 
     def instruction(self) -> Outcome:
-        return self.enact(self.delay_between_attempts)
+        return self.enact()
 
     def validate(self) -> RetryPolicy:
         if self.expired:
@@ -54,7 +67,7 @@ class RetryPolicy(Action[Name, Outcome]):
     def expired(self):
         return self.retries >= self.max_retries
 
-    def enact(self, with_delay: int = 0, counter: int = -1) -> Outcome:
+    def enact(self, counter: int = -1) -> Outcome:
         if not isinstance(counter, int) or counter < -1:
             raise self.Invalid(f'Cannot proceed with given `counter` param value: {counter}.')
 
@@ -63,6 +76,9 @@ class RetryPolicy(Action[Name, Outcome]):
                 break  # pragma: no cover
             attempt = self.action.perform()
             counter += _tally
+            with_delay = self.backoff.calculate(
+                counter, self.delay_between_attempts, self.jitter_percentage
+            )
             self._retries = counter
             if self.should_record:
                 self.attempts.append(attempt)
@@ -86,3 +102,34 @@ class RetryPolicy(Action[Name, Outcome]):
 
     class Enacted(Exception):
         pass
+
+    class Backoff(Enum):
+        CONSTANT = 'CONSTANT'
+        LINEAR = 'LINEAR'
+        EXPONENTIAL = 'EXPONENTIAL'
+
+        def calculate(self, coefficient: float, base: int, jitter_percentage: float):
+            if base == 0:
+                return 0
+            factor, is_fraction = self._rectify(base)
+            base = abs(factor * base if is_fraction else base)
+            coefficient = abs(coefficient)
+
+            approaches = {
+                self.CONSTANT: (coefficient ** 0) * base,       # 2, 2, 2, 2, ...
+                self.LINEAR: ((coefficient + 1) ** 1) * base,   # 2, 4, 6, 8, ...
+                self.EXPONENTIAL: (base ** coefficient) * base  # 2, 4, 8, 16, ...
+            }
+            delay = approaches[self] / factor if is_fraction else approaches[self]
+            jitter_fraction = (jitter_percentage / 100) * base
+            jitter = random.uniform(-jitter_fraction, jitter_fraction)
+            return delay + jitter
+
+        def _rectify(self, base: float):
+            order_of_magnitude = math.floor(math.log(abs(base), 10))
+            is_fraction = order_of_magnitude < 1
+            if is_fraction:
+                factor = 1 * 10 ** (abs(order_of_magnitude))
+            else:
+                factor = 1
+            return factor, is_fraction

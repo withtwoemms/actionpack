@@ -4,8 +4,10 @@ import math
 import random
 
 from enum import Enum
+from oslash import Left
 from string import Template
 from time import sleep
+from typing import Iterable
 
 from actionpack import Action
 from actionpack.action import Result
@@ -14,7 +16,10 @@ from actionpack.action import Outcome
 from actionpack.utils import tally
 
 
+# TODO -- devise means of passing .perform options to wrapped Action
+
 class RetryPolicy(Action[Name, Outcome]):
+
     def __init__(
         self,
         action: Action[Name, Outcome],
@@ -23,12 +28,15 @@ class RetryPolicy(Action[Name, Outcome]):
         max_delay: int = 3600,
         backoff: str = 'CONSTANT',
         jitter_percentage: float = 1.0,
-        should_record: bool = False
+        should_record: bool = False,
+        should_show_effort: bool = False
     ):
         if not isinstance(max_retries, int) or max_retries < 0:
             raise self.Invalid(f'The number of max_retries must be greater than zero. Given max_retries={max_retries}.')
         if jitter_percentage not in range(101):
             raise self.Invalid(f'The number of max_retries must be greater than zero. Given max_retries={max_retries}.')
+        if should_show_effort and not should_record:
+            raise self.Invalid('Attempts must be recorded to show Effort.')
 
         self.action = action
         self.backoff = RetryPolicy.Backoff(backoff)
@@ -37,6 +45,7 @@ class RetryPolicy(Action[Name, Outcome]):
         self.max_delay = max_delay
         self.max_retries = max_retries
         self.should_record = should_record
+        self.should_show_effort = should_show_effort
 
         if self.should_record:
             self.attempts: list[Result[Outcome]] = []
@@ -83,10 +92,17 @@ class RetryPolicy(Action[Name, Outcome]):
             if self.should_record:
                 self.attempts.append(attempt)
             if attempt.successful:
-                return attempt.value
+                outcome = attempt.value
+                if self.should_show_effort:
+                    outcome = self.Effort(*self.attempts, culmination=attempt)
+                return outcome
             sleep(with_delay)
 
-        raise RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
+        outcome = RetryPolicy.Expired(f'Max retries exceeded: {self.max_retries}.')
+        if self.should_show_effort:
+            return self.Effort(*self.attempts, culmination=Result(Left(outcome)))
+
+        raise outcome
 
     def __repr__(self):
         tmpl = Template('<$class_name($total_attempts x $action_name$delay)>')
@@ -133,3 +149,24 @@ class RetryPolicy(Action[Name, Outcome]):
             else:
                 factor = 1
             return factor, is_fraction
+
+    class Effort:
+
+        def __init__(self, *attempts: Iterable[Result], culmination: Result):
+            self.culmination: Result = culmination
+            self.attempts: Iterable[Result] = list(attempts)
+            self.initial_attempt: Result
+            self.retries: Iterable[Result]
+            if any(attempts):
+                self.initial_attempt, *self.retries = attempts
+            else:
+                self.initial_attempt, self.retries = culmination, []
+                self.attempts.append(self.initial_attempt)
+            self.final_attempt = self.retries[-1] if any(self.retries) else self.initial_attempt
+
+        def __repr__(self) -> str:
+            name = self.__class__.__name__
+            retries = ':retries' if self.retries else ''
+            status = 'succeeded' if self.culmination.successful else 'failed'
+
+            return f'<{name}:{status}{retries}>'

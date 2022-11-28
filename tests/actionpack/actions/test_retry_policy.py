@@ -119,6 +119,48 @@ class RetryPolicyTest(TestCase):
         self.assertListEqual([attempt.value for attempt in action.attempts], results)
 
     @patch('requests.Session.send')
+    def test_can_show_effort_if_successful(self, mock_session_send):
+        outcomes = ['SUCCEEDED!']
+        mock_session_send.side_effect = outcomes
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=self.max_retries,
+            should_record=True,
+            should_show_effort=True,
+        )
+        result = action.perform()
+        effort = result.value
+
+        self.assertIsInstance(effort, RetryPolicy.Effort)
+        self.assertIsInstance(effort.culmination, Result)
+        self.assertIsInstance(effort.culmination.value, str)
+        self.assertEqual(repr(effort), '<Effort:succeeded>')
+        for attempt in result.value.attempts:
+            self.assertTrue(attempt.successful)
+        self.assertListEqual([attempt.value for attempt in action.attempts], outcomes)
+
+    @patch('requests.Session.send')
+    def test_can_show_effort_if_unsuccessful(self, mock_session_send):
+        outcomes = [Exception('failed.')] * (self.max_retries + 1)
+        mock_session_send.side_effect = outcomes
+        action = RetryPolicy[str, str](
+            action=MakeRequest('GET', 'http://localhost'),
+            max_retries=self.max_retries,
+            should_record=True,
+            should_show_effort=True,
+        )
+        result = action.perform()
+        effort = result.value
+
+        self.assertIsInstance(effort, RetryPolicy.Effort)
+        self.assertIsInstance(effort.culmination, Result)
+        self.assertIsInstance(effort.culmination.value, RetryPolicy.Expired)
+        self.assertEqual(repr(effort), '<Effort:failed:retries>')
+        for attempt in effort.attempts:
+            self.assertFalse(attempt.successful)
+        self.assertListEqual([attempt.value for attempt in action.attempts], outcomes)
+
+    @patch('requests.Session.send')
     def test_can_enact_with_linear_backoff(self, mock_session_send):
         delay = 0.2  # seconds
         delay_microseconds = delay * 1E6

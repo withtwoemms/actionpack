@@ -113,6 +113,25 @@ class ProcedureTest(TestCase):
         # NOTE: the wellwish precedes since the question took longer
         self.assertEqual(file.read(), wellwish + question)
 
+    def test_can_execute_Procedure_asyncio(self):
+        file = FakeFile()
+
+        question = b' How are you?'
+        wellwish = b' I hope you\'re well.'
+
+        action1 = FakeWrite[str, int](file, question, delay=0.2)
+        action2 = FakeWrite[str, int](file, wellwish, delay=0.1)
+
+        procedure = Procedure[str, int]((action1, action2))
+        results = procedure.execute(max_workers=0, should_raise=True, synchronously=False)
+
+        assertIsIterable(results)
+        self.assertIsInstance(next(results), Result)
+        self.assertIsInstance(next(results), Result)
+
+        # NOTE: when running with asyncio the question preceeds the wellwish despite the question taking longer
+        self.assertEqual(file.read(), question + wellwish)
+
 
 class KeyedProcedureTest(TestCase):
 
@@ -143,6 +162,14 @@ class KeyedProcedureTest(TestCase):
 
     def test_can_execute_asynchronously(self):
         results = KeyedProcedure((success, failure)).execute(synchronously=False)
+
+        assertIsIterable(results)
+        results = dict(results)
+        self.assertIn('success', results.keys())
+        self.assertIn('failure', results.keys())
+
+    def test_can_execute_asyncio(self):
+        results = KeyedProcedure((success, failure)).execute(max_workers=0, synchronously=False)
 
         assertIsIterable(results)
         results = dict(results)

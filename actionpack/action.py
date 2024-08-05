@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 from functools import partialmethod
 from oslash import Left
 from oslash import Right
@@ -104,6 +105,13 @@ class Action(Generic[Name, Outcome], metaclass=ActionType):
 
     @synchronized(lock)
     def perform(
+        self,
+        should_raise: bool = False,
+        timestamp_provider: Callable[[], int] = microsecond_timestamp
+    ) -> Result[Outcome]:
+        return self._perform(should_raise, timestamp_provider)
+
+    async def aperform(
         self,
         should_raise: bool = False,
         timestamp_provider: Callable[[], int] = microsecond_timestamp

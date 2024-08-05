@@ -1,3 +1,6 @@
+import asyncio
+import functools
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from functools import reduce
@@ -12,6 +15,8 @@ from actionpack.action import Name
 from actionpack.action import Outcome
 from actionpack.action import Result
 from actionpack import Action
+
+logger = logging.getLogger(__name__)
 
 
 class Procedure(Generic[Name, Outcome]):
@@ -31,6 +36,25 @@ class Procedure(Generic[Name, Outcome]):
                 raise Procedure.NotAnAction(msg)
         return self
 
+    async def aio_gen(
+        self,
+        should_raise: bool = False
+    ) -> Iterator[Result[Outcome]]:
+        actions = []
+        # We only create coroutines here -- we're not running them until the `gather`.
+        for action in self.actions:
+            actions.append(action.aperform(should_raise=should_raise))
+
+        return await asyncio.gather(*actions, return_exceptions=not(should_raise))
+
+    async def aio_execute(
+        self,
+        should_raise: bool = False
+    ) -> Iterator[Result[Outcome]]:
+        val = await self.aio_gen(should_raise)
+        logger.debug(f"aio_execute {val}")
+        return val
+
     def execute(
         self,
         max_workers: int = 5,
@@ -42,6 +66,10 @@ class Procedure(Generic[Name, Outcome]):
         if synchronously:
             for action in actions:
                 yield action.perform(should_raise=should_raise) if should_raise else action.perform()
+        elif max_workers <= 0:
+            logger.debug("running asyncio for Procedure")
+            for t in asyncio.run(self.aio_execute(should_raise)):
+                yield t
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = {executor.submit(action._perform, should_raise=should_raise): str(action) for action in actions}
@@ -99,6 +127,22 @@ class KeyedProcedure(Procedure[Name, Outcome]):
                 raise KeyedProcedure.UnnamedAction(msg)
         return self
 
+    async def aio_gen(
+        self,
+        should_raise: bool = False
+    ) -> Iterator[Result[Outcome]]:
+        for action in self.actions:
+            ret = await action.aperform(should_raise=should_raise)
+            yield (action.name, ret)
+
+    async def aio_execute(
+        self,
+        should_raise: bool = False
+    ) -> Iterator[Result[Outcome]]:
+        val = [a async for a in self.aio_gen(should_raise)]
+        logger.debug(f"aio_execute {val}")
+        return val
+
     def execute(
         self,
         max_workers: int = 5,
@@ -109,6 +153,10 @@ class KeyedProcedure(Procedure[Name, Outcome]):
             for action in self:
                 yield (action.name, action.perform(should_raise=should_raise)) \
                       if should_raise else (action.name, action.perform())
+        elif max_workers <= 0:
+            logger.debug("running asyncio for KeyedProcedure")
+            for t in asyncio.run(self.aio_execute(should_raise)):
+                yield t
         else:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = {executor.submit(action._perform, should_raise=should_raise): action for action in self}
